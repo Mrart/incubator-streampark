@@ -133,6 +133,7 @@
           secretEnable: formValue.larkSecretEnable,
           secretToken: formValue.larkSecretToken,
         },
+        httpCallbackParams: { phonumber: formValue.alertSms },
         isJsonType: true,
       };
 

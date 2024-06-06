@@ -179,6 +179,6 @@ export const alertTypes = {
   '1': { name: t('setting.alarm.email'), value: 1, disabled: false, icon: 'mail' },
   '2': { name: t('setting.alarm.dingTalk'), value: 2, disabled: false, icon: 'dingtalk' },
   '4': { name: t('setting.alarm.weChat'), value: 4, disabled: false, icon: 'wecom' },
-  '8': { name: t('setting.alarm.sms'), value: 8, disabled: true, icon: 'message' },
+  '8': { name: t('setting.alarm.sms'), value: 8, disabled: false, icon: 'message' },
   '16': { name: t('setting.alarm.lark'), value: 16, disabled: false, icon: 'lark' },
 };

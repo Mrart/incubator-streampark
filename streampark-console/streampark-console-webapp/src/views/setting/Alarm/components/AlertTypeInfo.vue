@@ -40,6 +40,9 @@
   const emailInfo = computed(() => {
     return JSON.parse(alertSource.value.emailParams || '{}');
   });
+  const smsInfo = computed(() => {
+    return JSON.parse(alertSource.value.httpCallbackParams || '{}');
+  });
   const dingTalk = computed(() => {
     return JSON.parse(alertSource.value.dingTalkParams || '{}');
   });
@@ -89,6 +92,11 @@
         <Tag :color="lark.isAtAll ? 'green' : 'red'" class="!leading-20px">
           {{ lark.isAtAll }}
         </Tag>
+      </DescriptionsItem>
+    </template>
+    <template v-if="alertType === '8'">
+      <DescriptionsItem :label="t('setting.alarm.sms')">
+        <span class="text-blue-500">{{ smsInfo.phonumber || '' }}</span>
       </DescriptionsItem>
     </template>
   </Descriptions>

@@ -97,6 +97,7 @@
     let dingTalkParams: Recordable<any> = {};
     let weComParams: Recordable<any> = {};
     let larkParams: Recordable<any> = {};
+    let httpCallbackParams: Recordable<any> = {};
     if (item.alertTypeTags?.includes('1')) {
       emailParams = JSON.parse(item.emailParams);
     }
@@ -112,6 +113,9 @@
       larkParams = JSON.parse(item.larkParams) as Recordable;
       // larkIsAtAll = larkParams.isAtAll;
       // larkSecretEnable = larkParams.secretEnable;
+    }
+    if (item.alertTypeTags?.includes('8')) {
+      httpCallbackParams = JSON.parse(item.httpCallbackParams);
     }
 
     openAlertModal(true, {
@@ -130,6 +134,7 @@
       larkIsAtAll: larkParams.isAtAll,
       larkSecretEnable: larkParams.secretEnable,
       larkSecretToken: larkParams.secretToken,
+      alertSms: httpCallbackParams.phonumber
     });
   }
 

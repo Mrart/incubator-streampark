@@ -49,15 +49,18 @@
   const alertTypeTags = ref<string[]>([]);
   const dingTalk = reactive<Partial<DingTalkType>>({});
   const lark = reactive<Partial<LarkType>>({});
+  const smsInfo = ref<{ phonumber: string }>({ phonumber: '' });
 
   const [registerModal] = useModalInner((data) => {
     emailInfo.value = { contacts: '' };
+    smsInfo.value = { phonumber: '' };
     weChat.value = { contacts: '' };
     alertTypeTags.value = [];
     if (data) {
       alertTypeTags.value = data.alertTypeTags;
       emailInfo.value = JSON.parse(data.emailParams || '{}');
       weChat.value = JSON.parse(data.weComParams || '{}');
+      smsInfo.value = JSON.parse(data.httpCallbackParams || '{}');
       if (data.dingTalkParams) {
         Object.assign(dingTalk, JSON.parse(data.dingTalkParams || '{}'));
       }
@@ -148,6 +151,18 @@
         {{ t('setting.alarm.lark') }}
       </Divider>
       <Description :column="2" :data="lark" :schema="larkColumn" class="alert-detail" />
+    </template>
+    <template v-if="alertTypeTags.includes('8')">
+      <Divider>
+        <SvgIcon name="message" size="20" />
+        {{ t('setting.alarm.sms') }}
+      </Divider>
+      <Description
+        class="alert-detail"
+        :column="1"
+        :data="smsInfo"
+        :schema="[{ label: t('setting.alarm.sms'), field: 'phonumber' }]"
+      />
     </template>
   </BasicModal>
 </template>
