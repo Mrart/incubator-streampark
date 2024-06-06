@@ -8,6 +8,7 @@
   >
     <Row v-bind="getRow">
       <slot name="formHeader"></slot>
+      <slot name="formFooter" v-if="isAboutApp"></slot>
       <template v-for="schema in getSchema" :key="schema.field">
         <FormItem
           :tableAction="tableAction"
@@ -32,7 +33,7 @@
           <slot :name="item" v-bind="data || {}"></slot>
         </template>
       </FormAction>
-      <slot name="formFooter"></slot>
+      <slot name="formFooter" v-if="!isAboutApp"></slot>
     </Row>
   </AForm>
 </template>
@@ -70,7 +71,9 @@
     props: basicProps,
     emits: ['advanced-change', 'reset', 'submit', 'register', 'field-value-change'],
     setup(props, { emit, attrs }) {
-      const formModel = reactive<Recordable>({});
+      const formModel = reactive<Recordable>(props.initFormModel || {});
+      // const formModel = reactive<Recordable>({});
+      console.log(formModel)
       const modalFn = useModalContext();
 
       const advanceState = reactive<AdvanceState>({
@@ -118,6 +121,7 @@
 
       const getSchema = computed((): FormSchema[] => {
         const schemas: FormSchema[] = unref(schemaRef) || (unref(getProps).schemas as any);
+        // 循环作业名称、作业标签、创建者、作业类型
         for (const schema of schemas) {
           const { defaultValue, component } = schema;
           // handle date type
@@ -132,6 +136,7 @@
               schema.defaultValue = def;
             }
           }
+          // console.log("basicFormSchema:", schema);
         }
         if (unref(getProps).showAdvancedButton) {
           return cloneDeep(
@@ -233,6 +238,7 @@
       watch(
         () => formModel,
         useDebounceFn(() => {
+          console.log("formModel", formModel)
           unref(getProps).submitOnChange && handleSubmit();
         }, 300),
         { deep: true },
@@ -342,7 +348,14 @@
         }
       }
     }
-
+    .sql-item {
+      .ant-form-item-label {
+        display: none;
+      }
+      .ant-form-item-control {
+        max-width: 99%;
+      }
+    }
     .ant-form-explain {
       font-size: 14px;
     }

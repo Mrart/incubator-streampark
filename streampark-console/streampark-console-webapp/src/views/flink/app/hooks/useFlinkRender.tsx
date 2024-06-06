@@ -56,6 +56,7 @@ export const renderInputDropdown = (
   formModel: Recordable,
   field: string,
   componentProps: { placeholder: string; options: Array<string> },
+  isDisabled?: boolean
 ) => {
   return (
     <Input
@@ -64,6 +65,7 @@ export const renderInputDropdown = (
       allowClear
       value={formModel[field]}
       onInput={(e) => (formModel[field] = e.target.value)}
+      disabled={isDisabled}
     >
       {{
         addonAfter: () => (
@@ -126,6 +128,7 @@ export function handleCheckCheckpoint(values: Recordable) {
 
 /* render input Group component */
 export const renderInputGroup = ({ model }) => {
+  console.log("useFlinkRender", model)
   if (!Reflect.has(model, 'checkPointFailure')) {
     model.checkPointFailure = {};
   }
@@ -307,12 +310,13 @@ export const renderJobName = ({ model, field }: RenderCallbackParams) => {
   );
 };
 
-export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackParams) => {
+export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackParams, isDisabled?: boolean) => {
   return (
     <Select
       placeholder={t('flink.app.flinkCluster')}
       value={model[field]}
       onChange={(value: any) => (model[field] = value)}
+      disabled={isDisabled ?? false}
     >
       {clusters.map((item) => {
         return (
@@ -465,6 +469,7 @@ export const renderSqlHistory = (
   { model, flinkSqlHistory },
   { handleChangeSQL, handleCompareOk }: { handleChangeSQL: Fn; handleCompareOk: Fn },
 ) => {
+  console.log("model:", model)
   const { createConfirm } = useMessage();
   const compareSQL = ref<string[]>([]);
 

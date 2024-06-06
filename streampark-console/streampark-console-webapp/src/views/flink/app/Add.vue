@@ -23,7 +23,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import { Switch, Alert } from 'ant-design-vue';
-  import { onMounted, reactive, ref, unref } from 'vue';
+  import { onMounted, onBeforeUnmount, reactive, ref, unref, nextTick } from 'vue';
   import { PageWrapper } from '/@/components/Page';
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
 
@@ -41,11 +41,15 @@
   import { createLocalStorage } from '/@/utils/cache';
   import { buildUUID } from '/@/utils/uuid';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { AppListRecord } from '/@/api/flink/app/app.type';
   import VariableReview from './components/VariableReview.vue';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
   import { CreateParams } from '/@/api/flink/app/app.type';
   import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
+  import AddAttrDrawer from './components/AddAttrDrawer.vue'
+  import AddConfigDrawer from './components/AddConfigDrawer.vue'
+  import SidebarMenu from './components/SidebarMenu.vue'
   import {
     AppTypeEnum,
     ClusterStateEnum,
@@ -81,9 +85,23 @@
     jmPodTemplate: '',
     tmPodTemplate: '',
   });
-
-  const { flinkEnvs, flinkClusters, getCreateFormSchema, suggestions } =
-    useCreateSchema(dependencyRef);
+  const app = reactive<Partial<AppListRecord>>({});
+  let initFormModel = reactive<Recordable>({});
+  let checkedFromData = reactive<Recordable>({});
+  const modalJobType = ref()
+  const isShow = ref(false)
+  let isfailMsgActive = ref(false)
+  let isAttrfailMsgActive = ref(false)
+  const configForm = ref<InstanceType<typeof AddConfigDrawer> | null>(null);
+  const attributeForm = ref<InstanceType<typeof AddAttrDrawer> | null>(null);
+  const { 
+    flinkEnvs,
+    flinkClusters, 
+    getMainCreateFormSchema, 
+    getCustomCreateFormSchema, 
+    getAttrCreateFormSchema, 
+    suggestions 
+  } = useCreateSchema(dependencyRef, true);
 
   const [registerAppForm, { setFieldsValue, getFieldsValue, submit }] = useForm({
     labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
@@ -95,9 +113,18 @@
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
   const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
+  const [registerDrawer, { openDrawer, closeDrawer }] = useDrawer();
+  const [registerConfigureDrawer, { openDrawer: openConfigureDrawer, closeDrawer: closeConfigureDrawer }] = useDrawer();
+
+  const attrVisible = ref(false)
+  const configVisible = ref(false)
 
   /* Initialize the form */
   async function handleInitForm() {
+    const initFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams') || '{}')
+    modalJobType.value = initFormData.jobType
+    isShow.value = true
+    Object.assign(app, initFormData);
     const defaultValue = {
       resolveOrder: 0,
       k8sRestExposedType: 0,
@@ -109,7 +136,15 @@
     if (v) {
       Object.assign(defaultValue, { versionId: v.id });
     }
-    await setFieldsValue(defaultValue);
+    initFormData.args = ""
+    initFormModel = initFormData
+    console.log("add", initFormModel)
+    nextTick(() => {
+      setFieldsValue({
+        ...initFormData,
+        ...defaultValue
+      });
+    })
   }
 
   /* Open the sqlConf drawer */
@@ -201,7 +236,7 @@
         } else {
           params['jar'] = values.jar || null;
           params['mainClass'] = values.mainClass || null;
-          params['dependency'] = await getDependency();
+          params['dependency'] = values.dependency;
         }
         await handleCreateApp(params);
       } else {
@@ -211,33 +246,13 @@
           appType: AppTypeEnum.APACHE_FLINK,
           jar: unref(uploadJar),
           mainClass: values.mainClass,
-          dependency: await getDependency(),
+          dependency: values.dependency,
         });
         await handleCreateApp(params);
       }
     }
   }
-  async function getDependency() {
-    // Trigger a pom confirmation operation.
-    await unref(dependencyRef)?.handleApplyPom();
-    // common params...
-    const dependency: { pom?: string; jar?: string } = {};
-    const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
-    const uploadJars = unref(dependencyRef)?.uploadJars;
-    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
-      Object.assign(dependency, {
-        pom: unref(dependencyRecords),
-      });
-    }
-    if (uploadJars && unref(uploadJars).length > 0) {
-      Object.assign(dependency, {
-        jar: unref(uploadJars),
-      });
-    }
-    return dependency.pom === undefined && dependency.jar === undefined
-      ? null
-      : JSON.stringify(dependency);
-  }
+
   /* flink sql mode */
   async function handleSubmitSQL(values: Recordable) {
     let config = values.configOverride;
@@ -253,14 +268,29 @@
       appType: AppTypeEnum.STREAMPARK_FLINK,
       config,
       format: values.isSetConfig ? 1 : null,
-      dependency: await getDependency(),
+      dependency: values.dependency,
     };
+    delete values.options
     handleSubmitParams(params, values, k8sTemplate);
     handleCreateApp(params);
   }
   /* Submit to create */
   async function handleAppCreate(formValue: Recordable) {
     try {
+      const values = JSON.parse(sessionStorage.getItem('AddJobModalParams') || '{}');
+      const formModel = getFieldsValue();
+      formValue = {...values, ...formValue, ...formModel, ...checkedFromData}
+      console.log("handleAppCreate", formValue)
+      // 判断属性抽屉表单是否验证
+      await attributeForm.value?.checkFormValidation(formValue)
+      const attrvalus = attributeForm.value?.isSubmitConfig
+      if(!attrvalus) return 
+      isAttrfailMsgActive.value = false
+      // 判断配置抽屉表单是否验证
+      await configForm.value?.checkFormValidation(formValue)
+      const configvalus = configForm.value?.isSubmitConfig
+      if(!configvalus) return 
+      isfailMsgActive.value = false
       submitLoading.value = true;
       if (formValue.jobType === 'sql') {
         if (formValue.flinkSql == null || formValue.flinkSql.trim() === '') {
@@ -273,6 +303,9 @@
           }
         }
       }
+      k8sTemplate.podTemplate = formValue.k8sTemplate?.podTemplate ?? ''
+      k8sTemplate.jmPodTemplate = formValue.k8sTemplate?.jmPodTemplate ?? ''
+      k8sTemplate.tmPodTemplate = formValue.k8sTemplate?.tmPodTemplate ?? ''
       if (formValue.jobType === 'customcode') {
         handleSubmitCustomJob(formValue);
       } else {
@@ -294,6 +327,7 @@
     const socketId = buildUUID();
     ls.set('DOWN_SOCKET_ID', socketId);
     Object.assign(param, { socketId });
+    console.log("create", param)
     const { data } = await fetchCreate(param as CreateParams);
     submitLoading.value = false;
     if (data.data) {
@@ -303,89 +337,175 @@
     }
   }
 
+  async function handleEdit(type: string) {
+    if(attrVisible.value) {
+      await attributeForm.value?.handleSubmit()
+    }
+    if(configVisible.value) {
+      await configForm.value?.handleSubmit()
+    }
+    const sessionFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
+    const initFormData = getFieldsValue();
+    let name = sessionFormData.jobName
+    sessionStorage.setItem('AddJobModalParams', JSON.stringify({ ...initFormData,...sessionFormData}))
+    const checkPointFailure = !!sessionFormData.checkPointFailure ? sessionFormData.checkPointFailure : {}
+    if (type === 'attr') {
+      configVisible.value = false
+      attrVisible.value = true
+      closeConfigureDrawer()
+      openDrawer(true, {
+        ...initFormData,
+        ...sessionFormData, 
+        jobName: name, 
+        checkPointFailure: checkPointFailure
+      });
+    } else {
+      attrVisible.value = false
+      configVisible.value = true
+      closeDrawer()
+      openConfigureDrawer(true, sessionFormData);
+    }
+  }
+  async function addConfigFailed(data: string) {
+    configVisible.value = false
+    attrVisible.value = false
+    if (data === 'config') {
+      isfailMsgActive.value = true
+    } else {
+      isAttrfailMsgActive.value = true
+    }
+  }
+  function addAttrsuccess(type: string) {
+    if (type === 'config') {
+      isfailMsgActive.value = false
+    } else {
+      isAttrfailMsgActive.value = false
+    }
+    configVisible.value = false
+    attrVisible.value = false
+    const data = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
+    const oldData = getFieldsValue()
+    const params = {...oldData, ...data}
+    setFieldsValue({...params})
+    checkedFromData = params
+  }
+  
   onMounted(async () => {
     handleInitForm();
   });
+  onBeforeUnmount(() => {
+    sessionStorage.removeItem('AddJobModalParams');
+  })
 </script>
 
 <template>
-  <PageWrapper contentFullHeight contentBackground contentClass="p-26px app_controller">
-    <BasicForm @register="registerAppForm" @submit="handleAppCreate" :schemas="getCreateFormSchema">
-      <template #flinkSql="{ model, field }">
-        <FlinkSqlEditor
-          ref="flinkSql"
-          v-model:value="model[field]"
-          :versionId="model['versionId']"
-          :suggestions="suggestions"
-          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
-        />
-      </template>
-      <template #dependency="{ model, field }">
-        <Dependency
-          ref="dependencyRef"
-          v-model:value="model[field]"
-          :form-model="model"
-          :flink-envs="flinkEnvs"
-        />
-      </template>
-      <template #isSetConfig="{ model, field }">
-        <Switch checked-children="ON" un-checked-children="OFF" v-model:checked="model[field]" />
-        <SettingTwoTone
-          v-if="model[field]"
-          class="ml-10px"
-          theme="twoTone"
-          two-tone-color="#4a9ff5"
-          @click="handleSQLConf(true, model)"
-        />
-      </template>
-      <template #uploadJobJar>
-        <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading">
-          <template #uploadInfo>
-            <Alert v-if="uploadJar" class="uploadjar-box" type="info">
-              <template #message>
-                <span class="tag-dependency-pom">
-                  {{ uploadJar }}
-                </span>
-              </template>
-            </Alert>
-          </template>
-        </UploadJobJar>
-      </template>
-      <template #podTemplate>
-        <PomTemplateTab
-          v-model:podTemplate="k8sTemplate.podTemplate"
-          v-model:jmPodTemplate="k8sTemplate.jmPodTemplate"
-          v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"
-        />
-      </template>
-      <template #args="{ model }">
-        <ProgramArgs
-          v-model:value="model.args"
-          :suggestions="suggestions"
-          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
-        />
-      </template>
-      <template #useSysHadoopConf="{ model, field }">
-        <UseSysHadoopConf v-model:hadoopConf="model[field]" />
-      </template>
-      <template #formFooter>
-        <div class="flex items-center w-full justify-center">
-          <a-button @click="go('/flink/app')">
-            {{ t('common.cancelText') }}
-          </a-button>
-          <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
-            {{ t('common.submitText') }}
-          </a-button>
-        </div>
-      </template>
-    </BasicForm>
-    <Mergely
-      @ok="(data) => setFieldsValue(data)"
-      @close="handleEditConfClose"
-      @register="registerConfDrawer"
+  <div>
+    <PageWrapper contentFullHeight contentBackground contentClass="p-26px app_controller app-content-margin-right">
+      <BasicForm
+        v-if="!!isShow"
+        @register="registerAppForm"
+        @submit="handleAppCreate"
+        :schemas="modalJobType === 'sql' ? getMainCreateFormSchema : getCustomCreateFormSchema"
+        :initFormModel="initFormModel"
+        :isAboutApp="true"
+      >
+        <template #flinkSql="{ model, field }">
+          <FlinkSqlEditor
+            ref="flinkSql"
+            v-model:value="model[field]"
+            :versionId="model['versionId']"
+            :suggestions="suggestions"
+            @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+          />
+        </template>
+        <template #dependency="{ model, field }">
+          <Dependency
+            ref="dependencyRef"
+            v-model:value="model[field]"
+            :form-model="model"
+            :flink-envs="flinkEnvs"
+          />
+        </template>
+        <template #isSetConfig="{ model, field }">
+          <Switch checked-children="ON" un-checked-children="OFF" v-model:checked="model[field]" />
+          <SettingTwoTone
+            v-if="model[field]"
+            class="ml-10px"
+            theme="twoTone"
+            two-tone-color="#4a9ff5"
+            @click="handleSQLConf(true, model)"
+          />
+        </template>
+        <template #uploadJobJar>
+          <UploadJobJar :custom-request="handleCustomJobRequest" v-model:loading="uploadLoading">
+            <template #uploadInfo>
+              <Alert v-if="uploadJar" class="uploadjar-box" type="info">
+                <template #message>
+                  <span class="tag-dependency-pom">
+                    {{ uploadJar }}
+                  </span>
+                </template>
+              </Alert>
+            </template>
+          </UploadJobJar>
+        </template>
+        <template #podTemplate>
+          <PomTemplateTab
+            v-model:podTemplate="k8sTemplate.podTemplate"
+            v-model:jmPodTemplate="k8sTemplate.jmPodTemplate"
+            v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"
+          />
+        </template>
+        <template #args="{ model }">
+          <ProgramArgs
+            v-model:value="model.args"
+            :suggestions="suggestions"
+            @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+          />
+        </template>
+        <template #useSysHadoopConf="{ model, field }">
+          <UseSysHadoopConf v-model:hadoopConf="model[field]" />
+        </template>
+        <template #formFooter>
+          <div class="flex items-center w-full justify-end">
+            <a-button @click="go('/flink/app')">
+              {{ t('common.cancelText') }}
+            </a-button>
+            <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
+              {{ t('common.submitText') }}
+            </a-button>
+          </div>
+        </template>
+      </BasicForm>
+      <Mergely
+        @ok="(data) => setFieldsValue(data)"
+        @close="handleEditConfClose"
+        @register="registerConfDrawer"
+      />
+      <VariableReview @register="registerReviewDrawer" />
+      <SidebarMenu
+        :isAttrfailMsgActive="isAttrfailMsgActive"
+        :isfailMsgActive="isfailMsgActive"
+        :attrVisible="attrVisible" 
+        :configVisible="configVisible" 
+        @openDrawer="handleEdit" 
+      />
+    </PageWrapper>
+    <AddAttrDrawer
+      ref="attributeForm"
+      :schema=getAttrCreateFormSchema
+      :flinkEnvs="flinkEnvs"
+      @register="registerDrawer"
+      @addAttrFailed="addConfigFailed"
+      @addAttrsuccess="addAttrsuccess"
     />
-    <VariableReview @register="registerReviewDrawer" />
-  </PageWrapper>
+    <AddConfigDrawer
+      ref="configForm"
+      @register="registerConfigureDrawer" 
+      @addConfigFailed="addConfigFailed"
+      @addAttrsuccess="addAttrsuccess"
+    />
+</div>
 </template>
 <style lang="less">
   @import url('./styles/Add.less');

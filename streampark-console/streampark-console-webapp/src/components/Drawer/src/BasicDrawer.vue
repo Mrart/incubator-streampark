@@ -153,14 +153,18 @@
 
       // Cancel event
       async function onClose(e: Recordable) {
-        const { closeFunc } = unref(getProps);
-        emit('close', e);
-        if (closeFunc && isFunction(closeFunc)) {
-          const res = await closeFunc();
-          visibleRef.value = !res;
-          return;
+        if (props.closeType == 'changeCloseHandlen') {
+          emit('ok');
+        } else {
+          const { closeFunc } = unref(getProps);
+          emit('close', e);
+          if (closeFunc && isFunction(closeFunc)) {
+            const res = await closeFunc();
+            visibleRef.value = !res;
+            return;
+          }
+          visibleRef.value = false;
         }
-        visibleRef.value = false;
       }
 
       function setDrawerProps(props: Partial<DrawerProps>): void {

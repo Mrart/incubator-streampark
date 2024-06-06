@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 export default {
+  alertAdd: '创建新作业',
   id: '作业ID',
   appName: '作业名称',
   searchName: '作业名称',
@@ -50,7 +51,7 @@ export default {
   flinkBaseDockerImage: 'Flink基础docker镜像',
   restServiceExposedType: 'K8S服务对外类型',
   resourceFrom: '资源来源',
-  uploadJobJar: '上传jar文件',
+  uploadJobJar: '上传文件',
   useExisting: '使用当前配置',
   reselect: '重新选择配置',
   mainClass: '程序入口类',
@@ -61,8 +62,8 @@ export default {
   programJar: '程序Jar文件',
   dynamicProperties: '动态参数',
   hadoopConfigTitle: '系统 Hadoop',
-  dragUploadTitle: '单击或拖动 jar 到此区域以上传',
-  dragUploadTip: '支持单次上传。您可以在此处上传本地 jar 以支持当前作业',
+  dragUploadTitle: '单击或拖动 jar、conf、xml、keytab 到此区域以上传',
+  dragUploadTip: '支持单次上传。您可以在此处上传本地 jar、conf、xml、keytab 以支持当前作业',
   dependencyError: '请先检查flink 版本.',
   status: '运行状态',
   startTime: '启动时间',
@@ -313,4 +314,12 @@ export default {
     yarnQueue:
       '此输入不仅支持快速设置 "yarn.application.name" 还支持设置 "yarn.application.node-label"。例如，输入 "queue1" 表示 "yarn.application.name" 的值为 "queue1"，而输入 "queue1{\'@\'}label1,label2" 则表示 "yarn.application.name" 设置为 "queue1" 且 "yarn.application.node-label" 设置为 "label1,label2"。Queue 和 label 之间使用 {\'@\'} 分隔。',
   },
+  addDrawerMenu: {
+    attribute: '属性',
+    configuration: '配置',
+    editAttr: '编辑属性',
+    editConfig: '编辑配置',
+    attributeValidateTips: '属性选项有必填字段未填',
+    configValidateTips: '配置选项有必填字段未填'
+  }
 };

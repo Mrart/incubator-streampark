@@ -176,6 +176,7 @@ export function handleYarnQueue(values: Recordable) {
 /* Splice parameters */
 export function handleFormValue(values: Recordable) {
   const options = {};
+  console.log("handleFormValue", values)
   for (const k in values) {
     const v = values[k];
     if (v != null && v !== '' && v !== undefined) {
@@ -203,6 +204,7 @@ export function handleFormValue(values: Recordable) {
       }
     }
   }
+  console.log("options", options)
   return options;
 }
 
@@ -283,7 +285,13 @@ export function handleSubmitParams(
   values: Recordable,
   k8sTemplate: Recordable,
 ) {
-  const options = handleFormValue(values);
+  let options = handleFormValue(values);
+  console.log("handleSubmitParams", values)
+  // if(!values.options) {
+  //   options = handleFormValue(values);
+  // } else {
+  //   options = values.options
+  // }
   Object.assign(params, {
     executionMode: values.executionMode,
     versionId: values.versionId,

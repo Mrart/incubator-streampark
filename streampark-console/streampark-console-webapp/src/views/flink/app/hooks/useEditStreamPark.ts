@@ -43,12 +43,17 @@ export const useEditStreamParkSchema = (
     flinkEnvs,
     flinkClusters,
     getFlinkSqlSchema,
+    getFlinkSqlOtherSchema,
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
     getFlinkTypeSchema,
     getExecutionModeSchema,
+    getFlinkNameDetailSchema,
+    getFlinkFormAttrOtherSchemas,
+    getEditFormOtherSchemas,
+    getFlinkFormConfigSchemas,
     suggestions,
-  } = useCreateAndEditSchema(dependencyRef, {
+  } = useCreateAndEditSchema(dependencyRef, false, {
     appId: appId,
     mode: 'streampark',
   });
@@ -116,14 +121,14 @@ export const useEditStreamParkSchema = (
   }
   const getEditStreamParkFormSchema = computed((): FormSchema[] => {
     return [
-      ...getFlinkTypeSchema.value,
-      ...getExecutionModeSchema.value,
-      ...getFlinkClusterSchemas.value,
+      ...getFlinkTypeSchema.value, // 作业模式 + 作业类型
+      ...getExecutionModeSchema.value, // 执行模式
+      ...getFlinkClusterSchemas.value, // flink版本 + flink集群
       {
-        field: 'flinkSqlHistory',
+        field: 'flinkSqlHistory', // 历史版本
         label: t('flink.app.historyVersion'),
         component: 'Select',
-        render: ({ model }) =>
+        render: ({ model }) => 
           renderSqlHistory(
             { model, flinkSqlHistory: unref(flinkSqlHistory) },
             { handleChangeSQL, handleCompareOk },
@@ -133,9 +138,10 @@ export const useEditStreamParkSchema = (
         },
         required: true,
       },
-      ...getFlinkSqlSchema.value,
+      ...getFlinkSqlSchema.value, // sql
+      ...getFlinkSqlOtherSchema.value, // 作业配置
       {
-        field: 'projectName',
+        field: 'projectName', // 项目名称
         label: 'Project',
         component: 'Input',
         render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
@@ -195,11 +201,110 @@ export const useEditStreamParkSchema = (
       ...getFlinkFormOtherSchemas.value,
     ];
   });
+
+  // 主页
+  const getEditMainStreamParkFormSchema = computed((): FormSchema[] => {
+    return [
+      ...getFlinkSqlSchema.value, // sql
+      {
+        field: 'projectName', // 项目名称
+        label: 'Project',
+        component: 'Input',
+        render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
+        ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.projectName,
+      },
+      { field: 'project', label: 'ProjectId', component: 'Input', show: false },
+      {
+        field: 'module',
+        label: 'Application',
+        component: 'Input',
+        render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
+        ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.module,
+      },
+      { field: 'configId', label: 'configId', component: 'Input', show: false },
+      { field: 'config', label: '', component: 'Input', show: false },
+      {
+        field: 'appConf',
+        label: 'Application conf',
+        component: 'Input',
+        slot: 'appConf',
+        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
+      },
+    ]
+  })
+  // 属性
+  const getEditAttrStreamParkFormSchema = computed((): FormSchema[] => {
+    return [
+      ...getFlinkTypeSchema.value, // 作业模式 + 作业类型
+      ...getExecutionModeSchema.value, // 执行模式
+      ...getFlinkClusterSchemas.value, // flink版本 + flink集群
+      {
+        field: 'flinkSqlHistory', // 历史版本
+        label: t('flink.app.historyVersion'),
+        component: 'Select',
+        render: ({ model }) => 
+          renderSqlHistory(
+            { model, flinkSqlHistory: unref(flinkSqlHistory) },
+            { handleChangeSQL, handleCompareOk },
+          ),
+        ifShow: ({ values }) => {
+          return values.jobType == JobTypeEnum.SQL && unref(flinkSqlHistory).length > 1;
+        },
+        required: true,
+      },
+      ...getFlinkSqlOtherSchema.value, // 作业配置
+      {
+        field: 'dependency',
+        label: t('flink.app.dependency'),
+        component: 'Input',
+        slot: 'dependency',
+        ifShow: ({ values }) => {
+          return values.jobType == JobTypeEnum.SQL
+            ? true
+            : values?.appType == AppTypeEnum.APACHE_FLINK;
+        },
+      },
+      
+      { field: 'strategy', label: '', component: 'Input', show: false },
+      {
+        field: 'compareConf',
+        label: 'Compare conf',
+        component: 'Input',
+        slot: 'compareConf',
+        defaultValue: [],
+        ifShow: ({ values }) => {
+          return (
+            values.jobType == JobTypeEnum.JAR &&
+            values.strategy == UseStrategyEnum.USE_EXIST &&
+            unref(configVersions).length > 1
+          );
+        },
+      },
+      {
+        field: 'useSysHadoopConf',
+        label: 'Use System Hadoop Conf',
+        component: 'Switch',
+        slot: 'useSysHadoopConf',
+        defaultValue: false,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
+      },
+      ...getFlinkNameDetailSchema.value, // 作业名称 + 描述
+      ...getFlinkFormAttrOtherSchemas.value, // (失败后)重启次数 + 告警模板 + checkPoint失败策略
+      ...getEditFormOtherSchemas.value // yarn pod
+    ]
+  })
+  // 配置
+  const getEditConfigStreamParkFormSchema = computed((): FormSchema[] => {
+    return [...getFlinkFormConfigSchemas.value]
+  })
   return {
     alerts,
     flinkEnvs,
     flinkClusters,
     getEditStreamParkFormSchema,
+    getEditMainStreamParkFormSchema,
+    getEditAttrStreamParkFormSchema,
+    getEditConfigStreamParkFormSchema,
     flinkSql,
     registerDifferentDrawer,
     suggestions,

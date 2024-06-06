@@ -35,10 +35,14 @@ export const useEditFlinkSchema = (jars: Ref) => {
     flinkClusters,
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
+    getFlinkNameDetailSchema,
+    getFlinkFormAttrOtherSchemas,
+    getFlinkFormConfigSchemas,
+    getEditFormOtherSchemas,
     getFlinkTypeSchema,
     getExecutionModeSchema,
     suggestions,
-  } = useCreateAndEditSchema(null, { appId: route.query.appId as string, mode: 'streampark' });
+  } = useCreateAndEditSchema(null, undefined, { appId: route.query.appId as string, mode: 'streampark' });
 
   const getEditFlinkFormSchema = computed((): FormSchema[] => {
     return [
@@ -105,7 +109,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
         label: 'Program Jar',
         component: 'Input',
         dynamicDisabled: true,
-        ifShow: ({ model }) => model.resourceFrom !== ResourceFromEnum.CICD,
+        ifShow: ({ model }) => model.resourceFrom !== ResourceFromEnum.CICD
       },
       {
         field: 'mainClass',
@@ -126,8 +130,110 @@ export const useEditFlinkSchema = (jars: Ref) => {
       ...getFlinkFormOtherSchemas.value,
     ];
   });
+
+  // 主页
+  const getEditMainFlinkFormSchema = computed((): FormSchema[] => {
+    return [
+      {
+        field: 'resourceFrom',
+        label: 'Resource From',
+        component: 'Input',
+        render: ({ model }) => {
+          if (model.resourceFrom == ResourceFromEnum.CICD)
+            return getAlertSvgIcon('github', 'CICD (build from CSV)');
+          else if (model.resourceFrom == ResourceFromEnum.UPLOAD)
+            return getAlertSvgIcon('upload', 'Upload (upload local job)');
+          else return '';
+        },
+      },
+      {
+        field: 'projectName',
+        label: 'Project',
+        component: 'Input',
+        render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD && model.projectName,
+      },
+      {
+        field: 'module',
+        label: 'Module',
+        component: 'Input',
+        render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD && model.module,
+      },
+      {
+        field: 'jar',
+        label: 'Program Jar',
+        component: 'Select',
+        componentProps: ({ formModel }) => {
+          return {
+            placeholder: 'Please select jar',
+            options: unref(jars).map((i) => ({ label: i, value: i })),
+            onChange: (value: string) => {
+              fetchMain({
+                projectId: formModel.projectId,
+                module: formModel.module,
+                jar: value,
+              }).then((res) => {
+                formModel.mainClass = res;
+              });
+            },
+          };
+        },
+        ifShow: ({ model }) => model.resourceFrom == ResourceFromEnum.CICD,
+        rules: [{ required: true, message: 'Please select jar' }],
+      },
+      {
+        field: 'uploadJobJar',
+        label: 'Upload Job Jar',
+        component: 'Select',
+        slot: 'uploadJobJar',
+        ifShow: ({ model }) => model.resourceFrom != ResourceFromEnum.CICD,
+      },
+      {
+        field: 'jar',
+        label: 'Program Jar',
+        component: 'Input',
+        dynamicDisabled: true,
+        ifShow: ({ model }) => model.resourceFrom !== ResourceFromEnum.CICD
+      },
+      {
+        field: 'mainClass',
+        label: 'Program Main',
+        component: 'Input',
+        componentProps: {
+          allowClear: true,
+          placeholder: 'Please enter Main class',
+        },
+        rules: [{ required: true, message: 'Program Main is required' }],
+      },
+    ]
+  })
+  // 属性
+  const getEditAttrFlinkFormSchema = computed((): FormSchema[] => {
+    return [
+      ...getFlinkTypeSchema.value,
+      ...getExecutionModeSchema.value,
+      ...getFlinkClusterSchemas.value,
+      ...getFlinkNameDetailSchema.value, // 作业名称 + 描述
+      ...getFlinkFormAttrOtherSchemas.value, // (失败后)重启次数 + 告警模板 + checkPoint失败策略
+      {
+        field: 'dependency',
+        label: t('flink.app.dependency'),
+        component: 'Input',
+        slot: 'dependency',
+      },
+      ...getEditFormOtherSchemas.value
+    ]
+  })
+  // 配置
+  const getEditConfigFlinkFormSchema = computed((): FormSchema[] => {
+    return [...getFlinkFormConfigSchemas.value]
+  })
   return {
     getEditFlinkFormSchema,
+    getEditMainFlinkFormSchema,
+    getEditAttrFlinkFormSchema,
+    getEditConfigFlinkFormSchema,
     flinkEnvs,
     flinkClusters,
     flinkSql,

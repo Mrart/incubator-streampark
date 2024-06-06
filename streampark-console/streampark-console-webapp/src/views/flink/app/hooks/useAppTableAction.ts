@@ -44,6 +44,7 @@ export const useAppTableAction = (
   openBuildDrawer: Fn,
   handlePageDataReload: Fn,
   optionApps: Recordable,
+  openAlertModal: Fn
 ) => {
   const { t } = useI18n();
   const tagsOptions = ref<Recordable>([]);
@@ -269,7 +270,7 @@ export const useAppTableAction = (
       showSubmitButton: false,
       showResetButton: false,
       async resetFunc() {
-        router.push({ path: '/flink/app/add' });
+        openAlertModal()
       },
       schemas: [
         {

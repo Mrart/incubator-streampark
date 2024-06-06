@@ -22,7 +22,7 @@
 <script setup lang="ts" name="EditStreamPark">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { onMounted, reactive, ref, nextTick, unref } from 'vue';
+  import { onMounted, onBeforeUnmount, reactive, ref, nextTick, unref } from 'vue';
   import { AppListRecord } from '/@/api/flink/app/app.type';
   import configOptions from './data/option';
   import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app/app';
@@ -49,6 +49,9 @@
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
   import { ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+  import AddAttrDrawer from './components/AddAttrDrawer.vue'
+  import AddConfigDrawer from './components/AddConfigDrawer.vue'
+  import SidebarMenu from './components/SidebarMenu.vue'
 
   const route = useRoute();
   const go = useGo();
@@ -65,6 +68,14 @@
   const dependencyRef = ref();
   const programArgRef = ref();
   const podTemplateRef = ref();
+  let initFormModel = reactive<Recordable>({})
+  const isShow = ref(false)
+  let isfailMsgActive = ref(false)
+  let isAttrfailMsgActive = ref(false)
+  const configForm = ref<InstanceType<typeof AddConfigDrawer> | null>(null);
+  const attributeForm = ref<InstanceType<typeof AddAttrDrawer> | null>(null);
+  const attrVisible = ref(false)
+  const configVisible = ref(false)
 
   const k8sTemplate = reactive({
     podTemplate: '',
@@ -77,7 +88,8 @@
     alerts,
     flinkEnvs,
     flinkSql,
-    getEditStreamParkFormSchema,
+    getEditMainStreamParkFormSchema,
+    getEditAttrStreamParkFormSchema,
     registerDifferentDrawer,
     suggestions,
   } = useEditStreamParkSchema(configVersions, flinkSqlHistory, dependencyRef);
@@ -93,6 +105,8 @@
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
   const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
+  const [registerDrawer, { openDrawer, closeDrawer }] = useDrawer();
+  const [registerConfigureDrawer, { openDrawer: openConfigureDrawer, closeDrawer: closeConfigureDrawer }] = useDrawer();
 
   /* Form reset */
   function handleReset(executionMode?: string) {
@@ -122,6 +136,11 @@
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         serviceAccount: app.serviceAccount || null,
+        k8sTemplate: {
+          podTemplate: app.k8sPodTemplate || '',
+          jmPodTemplate: app.k8sJmPodTemplate || '',
+          tmPodTemplate: app.k8sTmPodTemplate || '',
+        },
         ...resetParams,
       };
 
@@ -143,6 +162,8 @@
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
       setFieldsValue(defaultParams);
+      initFormModel = {...initFormModel, ...defaultParams}
+      sessionStorage.setItem('AddJobModalParams', JSON.stringify(initFormModel))
       app.args && programArgRef.value?.setContent(app.args);
     });
   }
@@ -165,6 +186,21 @@
   /* Handling update parameters */
   async function handleAppUpdate(values) {
     try {
+      const drawerValues = sessionStorage.getItem('AddJobModalParams') || '{}';
+      values = { ...JSON.parse(drawerValues), ...values}
+      k8sTemplate.podTemplate = values.k8sTemplate?.podTemplate ?? ''
+      k8sTemplate.jmPodTemplate = values.k8sTemplate?.jmPodTemplate ?? ''
+      k8sTemplate.tmPodTemplate = values.k8sTemplate?.tmPodTemplate ?? ''
+      // 判断属性抽屉表单是否验证
+      // await attributeForm.value?.handleSubmit()
+      // const attrvalus = attributeForm.value?.isSubmitConfig
+      // if(!attrvalus) return 
+      // isAttrfailMsgActive.value = false
+      // // 判断配置抽屉表单是否验证
+      // await configForm.value?.handleSubmit()
+      // const configvalus = configForm.value?.isSubmitConfig
+      // if(!configvalus) return 
+      // isfailMsgActive.value = false
       submitLoading.value = true;
       if (app.jobType == JobTypeEnum.JAR) {
         handleSubmitCustomJob(values);
@@ -191,21 +227,6 @@
   async function handleSubmitSQL(values: Recordable) {
     try {
       // Trigger a pom confirmation operation.
-      await unref(dependencyRef)?.handleApplyPom();
-      // common params...
-      const dependency: { pom?: string; jar?: string } = {};
-      const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
-      const uploadJars = unref(dependencyRef)?.uploadJars;
-      if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
-        Object.assign(dependency, {
-          pom: unref(dependencyRecords),
-        });
-      }
-      if (uploadJars && unref(uploadJars).length > 0) {
-        Object.assign(dependency, {
-          jar: unref(uploadJars),
-        });
-      }
       let config = values.configOverride;
       if (config != null && config.trim() !== '') {
         config = encryptByBase64(config);
@@ -218,12 +239,10 @@
         flinkSql: values.flinkSql,
         config,
         format: values.isSetConfig ? 1 : null,
-        dependency:
-          dependency.pom === undefined && dependency.jar === undefined
-            ? null
-            : JSON.stringify(dependency),
+        dependency: values.dependency
       };
       handleSubmitParams(params, values, k8sTemplate);
+      console.log("00w9e0w9e", values)
       await handleUpdateApp(params);
     } catch (error) {
       createMessage.error('edit error');
@@ -286,7 +305,6 @@
     configVersions.value = confVersion;
     Object.assign(app, res);
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
-
     if (app.jobType == JobTypeEnum.SQL) {
       fetchFlinkHistory({ id: appId }).then((res) => {
         flinkSqlHistory.value = res;
@@ -304,31 +322,43 @@
         [item.key]: item.defaultValue,
       });
     });
-
-    setFieldsValue({
-      jobType: res.jobType,
-      appType: res.appType,
-      executionMode: res.executionMode,
+    initFormModel = {
+      ...res,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
-      dependency: '',
-      module: res.module,
       configId,
       sqlId: app.sqlId,
       flinkSqlHistory: app.sqlId,
       versionId: app.versionId,
       projectName: app.projectName,
       project: app.projectId,
-      ...defaultFormValue,
-    });
+    }
+    isShow.value = true
+    // const params = {...initFormModel, k8sTemplate}
+    
     nextTick(() => {
+      setFieldsValue({
+        jobType: res.jobType,
+        appType: res.appType,
+        executionMode: res.executionMode,
+        flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
+        dependency: '',
+        module: res.module,
+        configId,
+        sqlId: app.sqlId,
+        flinkSqlHistory: app.sqlId,
+        versionId: app.versionId,
+        projectName: app.projectName,
+        project: app.projectId,
+        ...defaultFormValue,
+      });
       unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
 
-      setTimeout(() => {
-        unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
-        unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', res.k8sPodTemplate);
-        unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', res.k8sJmPodTemplate);
-        unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', res.k8sTmPodTemplate);
-      }, 1000);
+      // setTimeout(() => {
+      //   unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
+      //   unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', res.k8sPodTemplate);
+      //   unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', res.k8sJmPodTemplate);
+      //   unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', res.k8sTmPodTemplate);
+      // }, 1000);
     });
     handleReset();
   }
@@ -345,6 +375,41 @@
       setFieldsValue({ isSetConfig: false });
     }
   }
+
+  async function handleEdit(type: string) {
+    if(attrVisible.value) {
+      await attributeForm.value?.handleSubmit()
+    }
+    if(configVisible.value) {
+      await configForm.value?.handleSubmit()
+    }
+    const initFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
+    if (type === 'attr') {
+      configVisible.value = false
+      attrVisible.value = true
+      closeConfigureDrawer()
+      openDrawer(true, initFormData);
+    } else {
+      attrVisible.value = false
+      configVisible.value = true
+      closeDrawer()
+      openConfigureDrawer(true, initFormData);
+    }
+  }
+  async function addConfigFailed(type: string) {
+    if (type === 'config') {
+      isfailMsgActive.value = true
+    } else {
+      isAttrfailMsgActive.value = true
+    }
+    configVisible.value = false
+    attrVisible.value = false
+  }
+  async function addConfigsuccess() {
+    configVisible.value = false
+    attrVisible.value = false
+  }
+
   onMounted(() => {
     if (!route?.query?.appId) {
       go('/flink/app');
@@ -353,13 +418,20 @@
     }
     handleStreamParkInfo();
   });
+  onBeforeUnmount(() => {
+    sessionStorage.removeItem('AddJobModalParams');
+  })
 </script>
 <template>
-  <PageWrapper contentBackground content-class="p-26px app_controller">
+  <div>
+  <PageWrapper contentBackground content-class="p-26px app_controller app-content-margin-right">
     <BasicForm
+      v-if="!!isShow"
       @register="registerForm"
       @submit="handleAppUpdate"
-      :schemas="getEditStreamParkFormSchema"
+      :schemas="getEditMainStreamParkFormSchema"
+      :initFormModel="initFormModel"
+      :isAboutApp="true"
     >
       <template #podTemplate>
         <PomTemplateTab
@@ -409,7 +481,7 @@
       </template>
 
       <template #formFooter>
-        <div class="flex items-center w-full justify-center">
+        <div class="flex items-center w-full justify-end">
           <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
@@ -426,7 +498,29 @@
     />
     <Different @register="registerDifferentDrawer" />
     <VariableReview @register="registerReviewDrawer" />
+    <SidebarMenu
+      :isAttrfailMsgActive="isAttrfailMsgActive"
+      :isfailMsgActive="isfailMsgActive"
+      :attrVisible="attrVisible"
+      :configVisible="configVisible"
+      @openDrawer="handleEdit"
+    />
   </PageWrapper>
+  <AddAttrDrawer
+    ref="attributeForm"
+    :schema="getEditAttrStreamParkFormSchema"
+    :flinkEnvs="flinkEnvs"
+    @register="registerDrawer"
+    @addAttrFailed="addConfigFailed"
+    @addAttrsuccess="addConfigsuccess"
+  />
+  <AddConfigDrawer
+    ref="configForm"
+    @register="registerConfigureDrawer"
+    @addConfigFailed="addConfigFailed"
+    @addAttrsuccess="addConfigsuccess"
+  />
+</div>
 </template>
 <style lang="less">
   @import url('./styles/Add.less');

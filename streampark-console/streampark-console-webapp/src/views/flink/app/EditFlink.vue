@@ -22,7 +22,7 @@
 <script setup lang="ts" name="EditFlink">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { onMounted, reactive, ref, nextTick, unref } from 'vue';
+  import { onMounted, onBeforeUnmount, reactive, ref, nextTick, unref } from 'vue';
   import { Alert } from 'ant-design-vue';
   import { fetchMain, fetchUpload, fetchUpdate } from '/@/api/flink/app/app';
   import { handleSubmitParams } from './utils';
@@ -40,6 +40,9 @@
   import { useDrawer } from '/@/components/Drawer';
   import { ExecModeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
   import Dependency from '/@/views/flink/app/components/Dependency.vue';
+  import SidebarMenu from './components/SidebarMenu.vue'
+  import AddAttrDrawer from './components/AddAttrDrawer.vue'
+  import AddConfigDrawer from './components/AddConfigDrawer.vue'
 
   const route = useRoute();
   const { t } = useI18n();
@@ -54,16 +57,25 @@
   const programArgRef = ref();
   const podTemplateRef = ref();
   const dependencyRef = ref();
-
+  let initFormModel = reactive<Recordable>({})
+  let isfailMsgActive = ref(false)
+  let isAttrfailMsgActive = ref(false)
   const k8sTemplate = reactive({
     podTemplate: '',
     jmPodTemplate: '',
     tmPodTemplate: '',
   });
 
-  const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
+  const configForm = ref<InstanceType<typeof AddConfigDrawer> | null>(null);
+  const attributeForm = ref<InstanceType<typeof AddAttrDrawer> | null>(null);
+  const attrVisible = ref(false)
+  const configVisible = ref(false)
 
-  const { getEditFlinkFormSchema, alerts, suggestions } = useEditFlinkSchema(jars);
+  const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
+  const [registerDrawer, { openDrawer, closeDrawer }] = useDrawer();
+  const [registerConfigureDrawer, { openDrawer: openConfigureDrawer, closeDrawer: closeConfigureDrawer }] = useDrawer();
+
+  const { getEditMainFlinkFormSchema, getEditAttrFlinkFormSchema, getEditConfigFlinkFormSchema, flinkEnvs, alerts, suggestions } = useEditFlinkSchema(jars);
   const { handleGetApplication, app, handleResetApplication } = useEdit();
   const [registerForm, { setFieldsValue, submit }] = useForm({
     labelWidth: 120,
@@ -107,6 +119,11 @@
         alertId: selectAlertId,
         projectName: app.projectName,
         module: app.module,
+        k8sTemplate: {
+          podTemplate: app.k8sPodTemplate || '',
+          jmPodTemplate: app.k8sJmPodTemplate || '',
+          tmPodTemplate: app.k8sTmPodTemplate || '',
+        },
         ...resetParams,
       };
 
@@ -128,13 +145,17 @@
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
       setFieldsValue(defaultParams);
+      console.log("initFormModel", initFormModel)
+      console.log("defaultParams", defaultParams)
+      initFormModel = {...initFormModel, ...defaultParams}
+      sessionStorage.setItem('AddJobModalParams', JSON.stringify(initFormModel))
       app.args && programArgRef.value?.setContent(app.args);
-      setTimeout(() => {
-        unref(dependencyRef)?.setDefaultValue(JSON.parse(app.dependency || '{}'));
-        unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
-        unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', app.k8sJmPodTemplate);
-        unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', app.k8sTmPodTemplate);
-      }, 1000);
+      // setTimeout(() => {
+      //   unref(dependencyRef)?.setDefaultValue(JSON.parse(app.dependency || '{}'));
+      //   unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
+      //   unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', app.k8sJmPodTemplate);
+      //   unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', app.k8sTmPodTemplate);
+      // }, 1000);
     });
   }
   /* Custom job upload */
@@ -158,32 +179,21 @@
   /* Handling update parameters */
   async function handleAppUpdate(values: Recordable) {
     // Trigger a pom confirmation operation.
-    await unref(dependencyRef)?.handleApplyPom();
-    // common params...
-    const dependency: { pom?: string; jar?: string } = {};
-    const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
-    const uploadJars = unref(dependencyRef)?.uploadJars;
-    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
-      Object.assign(dependency, {
-        pom: unref(dependencyRecords),
-      });
-    }
-    if (uploadJars && unref(uploadJars).length > 0) {
-      Object.assign(dependency, {
-        jar: unref(uploadJars),
-      });
-    }
+    const drawerValues = sessionStorage.getItem('AddJobModalParams') || '{}';
+    values = { ...JSON.parse(drawerValues), ...values}
+    console.log("updatae", values)
+    k8sTemplate.podTemplate = values.k8sTemplate?.podTemplate ?? ''
+    k8sTemplate.jmPodTemplate = values.k8sTemplate?.jmPodTemplate ?? ''
+    k8sTemplate.tmPodTemplate = values.k8sTemplate?.tmPodTemplate ?? ''
     submitLoading.value = true;
     try {
       const params = {
         id: app.id,
         jar: values.jar,
         mainClass: values.mainClass,
-        dependency:
-          dependency.pom === undefined && dependency.jar === undefined
-            ? null
-            : JSON.stringify(dependency),
+        dependency: values.dependency
       };
+      console.log("updateValues", values)
       handleSubmitParams(params, values, k8sTemplate);
       await handleUpdateApp(params);
     } catch (error) {
@@ -193,11 +203,46 @@
 
   /* Submit an update */
   async function handleUpdateApp(params: Recordable) {
+    console.log("updateparams", params)
     const updated = await fetchUpdate(params);
     if (updated) {
       createMessage.success(t('flink.app.editStreamPark.success'));
       go('/flink/app');
     }
+  }
+
+  async function handleEdit(type: string) {
+    if(attrVisible.value) {
+      await attributeForm.value?.handleSubmit()
+    }
+    if(configVisible.value) {
+      await configForm.value?.handleSubmit()
+    }
+    const initFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
+    if (type === 'attr') {
+      configVisible.value = false
+      attrVisible.value = true
+      closeConfigureDrawer();
+      openDrawer(true, initFormData);
+    } else {
+      attrVisible.value = false
+      configVisible.value = true
+      closeDrawer()
+      openConfigureDrawer(true, initFormData);
+    }
+  }
+  async function addConfigFailed(type: string) {
+    if (type === 'config') {
+      isfailMsgActive.value = true
+    } else {
+      isAttrfailMsgActive.value = true
+    }
+    configVisible.value = false
+    attrVisible.value = false
+  }
+  async function addConfigsuccess() {
+    configVisible.value = false
+    attrVisible.value = false
   }
 
   onMounted(async () => {
@@ -207,19 +252,33 @@
       return;
     }
     const value = await handleGetApplication();
+    initFormModel = {...value, options: app.options || {}, id: route.query.appId}
+    // nextTick(async ()=>{
     await setFieldsValue(value);
-    if (app.resourceFrom == ResourceFromEnum.CICD) {
-      jars.value = await fetchListJars({
-        id: app.projectId,
-        module: app.module,
-      });
-    }
+    try {
+      if (app.resourceFrom == ResourceFromEnum.CICD) {
+        jars.value = await fetchListJars({
+          id: app.projectId,
+          module: app.module,
+        });
+      }
+    } catch(e) {}
     handleReset();
+    // })
   });
+  onBeforeUnmount(() => {
+    sessionStorage.removeItem('AddJobModalParams');
+  })
 </script>
 <template>
-  <PageWrapper contentBackground content-class="p-26px app_controller">
-    <BasicForm @register="registerForm" @submit="handleAppUpdate" :schemas="getEditFlinkFormSchema">
+  <div>
+  <PageWrapper contentBackground content-class="p-26px app_controller app-content-margin-right">
+    <BasicForm 
+      @register="registerForm" 
+      @submit="handleAppUpdate" 
+      :schemas="getEditMainFlinkFormSchema"
+      :isAboutApp="true"
+    >
       <template #podTemplate>
         <PomTemplateTab
           ref="podTemplateRef"
@@ -258,7 +317,7 @@
       </template>
 
       <template #formFooter>
-        <div class="flex items-center w-full justify-center">
+        <div class="flex items-center w-full justify-end">
           <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
@@ -269,7 +328,31 @@
       </template>
     </BasicForm>
     <VariableReview @register="registerReviewDrawer" />
+    <SidebarMenu
+      :isAttrfailMsgActive="isAttrfailMsgActive"
+      :isfailMsgActive="isfailMsgActive"
+      :attrVisible="attrVisible" 
+      :configVisible="configVisible" 
+      @openDrawer="handleEdit"
+    />
   </PageWrapper>
+  <AddAttrDrawer
+    ref="attributeForm"
+    :schema="getEditAttrFlinkFormSchema"
+    :flinkEnvs="flinkEnvs"
+    @register="registerDrawer"
+    @addAttrFailed="addConfigFailed"
+    @addAttrsuccess="addConfigsuccess"
+  />
+  <AddConfigDrawer
+    ref="configForm" 
+    :schema="getEditConfigFlinkFormSchema" 
+    @register="registerConfigureDrawer" 
+    @addConfigFailed="addConfigFailed"
+    @addAttrsuccess="addConfigsuccess"
+
+  />
+</div>
 </template>
 <style lang="less">
   @import url('./styles/Add.less');

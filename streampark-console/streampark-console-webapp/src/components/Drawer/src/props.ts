@@ -23,6 +23,7 @@ export const footerProps = {
     type: [String, Number] as PropType<string | number>,
     default: 60,
   },
+  closeType: { type: String, default: '' }
 };
 export const basicProps = {
   isDetail: { type: Boolean },

@@ -66,15 +66,15 @@
       default: () => [],
     },
   });
+  console.log("props", props)
   const defaultValue = '';
-
   /* verify */
   async function handleVerifySql() {
     if (isEmpty(props.value)) {
       verifyRes.errorMsg = 'empty sql';
       return false;
     }
-
+   console.log(props)
     if (!props.versionId) {
       createMessage.error(t('flink.app.dependencyError'));
       return false;
@@ -188,7 +188,8 @@
 </script>
 
 <template>
-  <div style="height: 550px" class="w-full" :class="fullContentClass">
+  <!-- 550 -->
+  <div style="height: calc(100vh - 180px)" class="w-full" :class="fullContentClass">
     <div
       class="full-content-tool flex justify-between px-20px pb-10px mb-10px"
       v-if="fullScreenStatus"
@@ -202,7 +203,7 @@
       </Tooltip>
     </div>
 
-    <div ref="flinkSql" class="overflow-hidden w-full mt-5px" :class="flinkEditorClass"></div>
+    
     <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
       <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
         <Icon icon="ant-design:check-outlined" />
@@ -263,6 +264,7 @@
         </a-button>
       </div>
     </div>
+    <div ref="flinkSql" class="overflow-hidden w-full mt-5px" :class="flinkEditorClass"></div>
   </div>
   <p class="conf-desc mt-10px" v-if="!fullScreenStatus">
     <span class="text-red-600" v-if="verifyRes.errorMsg"> {{ verifyRes.errorMsg }} </span>

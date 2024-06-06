@@ -50,6 +50,7 @@
   import { useSavepoint } from './hooks/useSavepoint';
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
+  import AddAlert from './AddAlert.vue';
   const { t } = useI18n();
   const optionApps = {
     starting: new Map(),
@@ -75,6 +76,7 @@
   const [registerStopModal, { openModal: openStopModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
+  const [registerAlertModal, { openModal: openAlertModal }] = useModal();
 
   const [registerTable, { reload, getLoading, setPagination }] = useTable({
     rowKey: 'id',
@@ -192,6 +194,7 @@
     openBuildDrawer,
     handlePageDataReload,
     optionApps,
+    openAlertModal
   );
 
   /* view */
@@ -346,6 +349,7 @@
     <StopApplicationModal @register="registerStopModal" @update-option="handleOptionApp" />
     <LogModal @register="registerLogModal" />
     <BuildDrawer @register="registerBuildDrawer" />
+    <AddAlert @register="registerAlertModal" width="850px" />
   </PageWrapper>
 </template>
 <style lang="less">

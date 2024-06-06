@@ -16,6 +16,7 @@
  */
 
 export default {
+  alertAdd: 'Add New Job',
   id: 'ID',
   appName: 'Job Name',
   searchName: 'Job Name',
@@ -53,7 +54,7 @@ export default {
   flinkBaseDockerImage: 'Flink Base Docker Image',
   restServiceExposedType: 'Rest-Service Exposed Type',
   resourceFrom: 'Resource From',
-  uploadJobJar: 'Upload Job Jar',
+  uploadJobJar: 'Upload Job',
   mainClass: 'Program Main',
   project: 'Project',
   module: 'Module',
@@ -62,9 +63,9 @@ export default {
   programJar: 'Program Jar',
   dynamicProperties: 'Dynamic Properties',
   hadoopConfigTitle: 'System Hadoop Configuration',
-  dragUploadTitle: 'Click or drag jar to this area to upload',
+  dragUploadTitle: 'Click or drag jar、conf、xml、keytab to this area to upload',
   dragUploadTip:
-    'Support for a single upload. You can upload a local jar here to support for current Job',
+    'Support for a single upload. You can upload a local jar、conf、xml、keytab here to support for current Job',
   dependencyError: 'please set flink version first.',
   status: 'Run Status',
   startTime: 'Start Time',
@@ -324,4 +325,12 @@ export default {
     yarnQueue:
       'It\'s used to quickly specify not only "yarn.application.name" but also "yarn.application.node-label". For example, "queue1" represents the value of "yarn.application.name" is "queue1", but "queue1{\'@\'}label1,label2" represents that the value of "yarn.application.name" is "queue1" and the value of "yarn.application.node-label" is "label1,label2". The queue and label are joined by {\'@\'}.',
   },
+  addDrawerMenu: {
+    attribute: 'attribute',
+    configuration: 'configuration',
+    editAttr: 'edit attribute',
+    editConfig: 'edit configure',
+    attributeValidateTips: 'The properties option has required field left unfilled',
+    configValidateTips: 'The configuration option has required fields left unfilled'
+  }
 };

@@ -29,12 +29,13 @@
 <script setup lang="ts" name="UseSysHadoopConf">
   import HadoopConfDrawer from './HadoopConfDrawer.vue';
   const { t } = useI18n();
-  defineProps({
+  const props = defineProps({
     hadoopConf: {
       type: Boolean,
       required: true,
     },
   });
+  console.log("useHoddp", props.hadoopConf)
   const emit = defineEmits(['update:hadoopConf']);
   const [registerHadoopConf, { openDrawer: openHadoopConfDrawer }] = useDrawer();
 </script>

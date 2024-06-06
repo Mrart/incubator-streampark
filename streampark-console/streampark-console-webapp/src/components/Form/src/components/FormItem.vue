@@ -46,6 +46,13 @@
       },
     },
     setup(props, { slots }) {
+      // console.log("formItem-schema:", props.schema);
+      // console.log("formItem-formActionType:", props.formActionType);
+      // console.log("formItem-tableAction:", props.tableAction);
+      // console.log("formItem-formProps:", props.formProps);
+      // console.log("formItem-allDefaultValues:", props.allDefaultValues);
+      // console.log("formItem-formModel:", props.formModel);
+      // console.log("formItem-setFormModel:", props.setFormModel);
       const { t } = useI18n();
 
       const { schema, formProps } = toRefs(props) as {
@@ -69,7 +76,7 @@
           schema: schema,
         };
       });
-
+      // console.log('getValues', getValues.value.field);
       const getComponentsProps = computed(() => {
         const { schema, tableAction, formModel, formActionType } = props;
         let { componentProps = {} } = schema;
@@ -348,7 +355,7 @@
             <Form.Item
               name={field}
               colon={colon}
-              class={{ 'suffix-item': showSuffix }}
+              class={{ 'suffix-item': showSuffix, 'sql-item': getValues.value.field==='flinkSql' ? true : false }}
               {...(itemProps as Recordable)}
               label={renderLabelHelpMessage()}
               rules={handleRules()}

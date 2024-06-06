@@ -52,7 +52,7 @@ export const useEdit = () => {
     return returnData;
   }
   /* Form reset */
-  function handleResetApplication() {
+  function handleResetApplication(data?) {
     let parallelism: Nullable<number> = null;
     let slot: Nullable<number> = null;
     const fieldValueOptions = {
@@ -60,6 +60,11 @@ export const useEdit = () => {
       tmOptionsItem: {},
       jmOptionsItem: {},
     };
+    if (data) {
+      Object.assign(defaultOptions, JSON.parse(data.options || '{}'))
+    }
+    console.log("defaultOptions", defaultOptions)
+    console.log("memoryItems", memoryItems)
     for (const k in defaultOptions) {
       let v = defaultOptions[k];
       if (isString(v)) v = v.replace(/[k|m|g]b$/g, '');
