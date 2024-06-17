@@ -22,8 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-
 import java.io.Serializable;
 
 @Schema(name = "AlertHttpCallback")
@@ -33,7 +31,7 @@ import java.io.Serializable;
 public class AlertHttpCallbackParams implements Serializable {
 
   @Schema(description = "http callback url")
-  @NotBlank(message = "The url of callback must be not empty")
+  //  @NotBlank(message = "The url of callback must be not empty")
   private String url;
 
   @Schema(
@@ -48,4 +46,7 @@ public class AlertHttpCallbackParams implements Serializable {
 
   @Schema(description = "use freemarker template replace the parameters")
   private String requestTemplate;
+
+  @Schema(description = "Phonumber must be not null")
+  private String phonumber;
 }

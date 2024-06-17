@@ -440,6 +440,18 @@
             <artifactId>force-shading</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>2.0.51</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hzbank.mqsdk</groupId>
+            <artifactId>HSBT-mqsdk-18</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>/Users/wulin/.m2/repository/com/hzbank/mqsdk/HSBT-mqsdk-18/1.0.0/HSBT-mqsdk-18-1.0.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

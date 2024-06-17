@@ -45,6 +45,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -54,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Getter
 @Setter
 @TableName("t_flink_cluster")
@@ -166,7 +168,7 @@ public class FlinkCluster implements Serializable {
         JacksonUtils.read(result, Overview.class);
         return true;
       } catch (Exception ignored) {
-        //
+        log.error("Verify cluster address {} connection failed!", address, ignored);
       }
       return false;
     } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
@@ -178,7 +180,7 @@ public class FlinkCluster implements Serializable {
         JacksonUtils.read(result, Overview.class);
         return true;
       } catch (Exception ignored) {
-        //
+        log.error("Verify cluster address {} connection failed!", address, ignored);
       }
       return false;
     }

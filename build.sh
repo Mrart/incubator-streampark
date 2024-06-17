@@ -184,7 +184,7 @@ build() {
       echo_g "build info: package mode @ detached, $scala, now build starting..."
     fi
 
-    "$PRG_DIR"/mvnw $profile -DskipTests clean install
+    "$PRG_DIR"/mvnw $profile -DskipTests clean install -Drat.skip=true
 
     if [ $? -eq 0 ]; then
       if [ $modeArg == 1 ]; then

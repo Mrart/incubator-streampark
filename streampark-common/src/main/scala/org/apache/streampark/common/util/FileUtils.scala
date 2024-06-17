@@ -26,6 +26,8 @@ import scala.collection.mutable
 
 object FileUtils {
 
+  private val JAR_MAGIC_NUMBER = "504B0304"
+
   private[this] def bytesToHexString(src: Array[Byte]): String = {
     val stringBuilder = new mutable.StringBuilder
     if (src == null || src.length <= 0) return null
@@ -40,6 +42,11 @@ object FileUtils {
     stringBuilder.toString
   }
 
+  def idValidFileType(fileName: String): Boolean = {
+    fileName.toLowerCase.endsWith(".conf") || fileName.toLowerCase.endsWith(
+      ".xml") || fileName.toLowerCase.endsWith(".keytab")
+  }
+
   def isJarFileType(input: InputStream): Boolean = {
     if (input == null) {
       throw new RuntimeException("The inputStream can not be null")
@@ -49,7 +56,7 @@ object FileUtils {
         val b = new Array[Byte](4)
         in.read(b, 0, b.length)
         bytesToHexString(b)
-    } == "504B0304"
+    } == JAR_MAGIC_NUMBER
   }
 
   def isJarFileType(file: File): Boolean = {

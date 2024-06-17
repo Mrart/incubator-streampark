@@ -143,7 +143,7 @@ public class AlertServiceImpl implements AlertService {
       case LARK:
         return LarkAlertNotifyServiceImpl.class;
       case HTTP_CALLBACK:
-        return HttpCallbackAlertNotifyServiceImpl.class;
+        return AlertHzbankSendMessageImpl.class;
       default:
         return null;
     }
