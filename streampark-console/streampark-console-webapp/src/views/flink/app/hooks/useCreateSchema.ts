@@ -48,7 +48,11 @@ const getJobTypeOptions = () => {
   ];
 };
 
-export const useCreateSchema = (dependencyRef: Ref, isDisabled? : boolean) => {
+export const useCreateSchema = (
+  dependencyRef: Ref, 
+  isDisabled? : boolean,
+  // edit?: { appId: string; mode: 'streampark' | 'flink' }
+) => {
   const moduleList = ref<Array<{ name: string }>>([]);
   const jars = ref<Array<any>>([]);
   const {
@@ -351,6 +355,7 @@ export const useCreateSchema = (dependencyRef: Ref, isDisabled? : boolean) => {
         component: 'Input',
         slot: 'dependency',
         ifShow: ({ values }) => {
+          console.log(values);
           return values?.jobType == 'sql' ? true : values?.appType == AppTypeEnum.APACHE_FLINK;
         },
       },
@@ -562,7 +567,7 @@ export const useCreateSchema = (dependencyRef: Ref, isDisabled? : boolean) => {
         component: 'InputTextArea',
         defaultValue: '',
         slot: 'args',
-        // ifShow: ({ values }) => (edit?.mode ? true : values.jobType == 'customcode'),
+        ifShow: ({ values }) => (values.jobType == 'customcode'),
       },
     ]
   })

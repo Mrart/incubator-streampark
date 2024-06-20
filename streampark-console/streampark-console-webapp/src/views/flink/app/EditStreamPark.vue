@@ -331,6 +331,7 @@
       versionId: app.versionId,
       projectName: app.projectName,
       project: app.projectId,
+      configVersions:confVersion
     }
     isShow.value = true
     // const params = {...initFormModel, k8sTemplate}

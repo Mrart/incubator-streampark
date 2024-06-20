@@ -20,7 +20,7 @@ export default defineComponent({
 });
 </script>
 <script setup lang="ts" name="AddAttrDrawer">
-import { computed, nextTick, defineComponent, ref, unref, reactive, defineExpose } from 'vue';
+import { computed, nextTick, defineComponent, ref, unref, reactive } from 'vue';
 import { BasicForm, FormSchema, useForm } from '/@/components/Form';
 // import { formSchema } from '../user.data';
 import { FormTypeEnum } from '/@/enums/formEnum';
@@ -36,6 +36,7 @@ import PomTemplateTab from './PodTemplate/PomTemplateTab.vue';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
 import UseSysHadoopConf from './UseSysHadoopConf.vue';
+import CompareConf from './CompareConf';
 import { FlinkEnv } from '/@/api/flink/setting/types/flinkEnv.type';
 const Dependency = createAsyncComponent(() => import('./Dependency.vue'), {
   loading: true,
@@ -66,6 +67,7 @@ const defaultCheckPointFailure = {
   cpFailureRateInterval: null,
   cpFailureAction: null 
 }
+const configVersions = ref<Array<{ id: string }>>([]);
 // const { getAttrCreateFormSchema, flinkEnvs } = useCreateSchema(dependencyRef, true);
 const [registerForm, { resetFields, setFieldsValue, clearValidate, validate }] = useForm({
   labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
@@ -91,6 +93,7 @@ const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (
   setFieldsValue({...parmas, dependency: ''});
   nextTick(() => {
     setTimeout(() => {
+      configVersions.value = data.configVersions
       unref(dependencyRef)?.setDefaultValue(JSON.parse(data.dependency || '{}'));
       if (data.id) {
         unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', data.k8sTemplate.podTemplate || '');
@@ -270,6 +273,9 @@ defineExpose({
       </template> -->
       <template #useSysHadoopConf="{ model, field }">
         <UseSysHadoopConf v-model:hadoopConf="model[field]" />
+      </template>
+      <template #compareConf="{ model }">
+        <CompareConf v-model:value="model.compareConf" :configVersions="configVersions" />
       </template>
     </BasicForm>
   </BasicDrawer>

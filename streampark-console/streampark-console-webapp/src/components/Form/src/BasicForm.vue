@@ -353,7 +353,7 @@
         display: none;
       }
       .ant-form-item-control {
-        max-width: 99%;
+        max-width: 100%;
       }
     }
     .ant-form-explain {

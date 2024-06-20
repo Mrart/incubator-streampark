@@ -139,6 +139,8 @@
   }
   /* format */
   function handleFormatSql() {
+    console.log('格式化');
+    
     if (isEmpty(props.value)) return;
     const formatSql = format(props.value);
     setContent(formatSql);
@@ -184,12 +186,12 @@
     emit('update:value', data);
   });
 
-  defineExpose({ handleVerifySql, setContent });
+  defineExpose({ handleVerifySql, setContent, handleFormatSql });
 </script>
 
 <template>
   <!-- 550 -->
-  <div style="height: calc(100vh - 180px)" class="w-full" :class="fullContentClass">
+  <div style="height: calc(100vh - 135px)" class="w-full" :class="fullContentClass">
     <div
       class="full-content-tool flex justify-between px-20px pb-10px mb-10px"
       v-if="fullScreenStatus"
@@ -203,8 +205,7 @@
       </Tooltip>
     </div>
 
-    
-    <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
+    <ButtonGroup class="flinksql-tool noFullScreenStatusStyle" v-if="!fullScreenStatus">
       <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
         <Icon icon="ant-design:check-outlined" />
         {{ t('flink.app.flinkSql.verify') }}
@@ -264,12 +265,18 @@
         </a-button>
       </div>
     </div>
+    <p class="conf-desc mt-10px" v-if="!fullScreenStatus" style="position: absolute; top: -30px; left: 0;">
+      <span class="text-red-600" v-if="verifyRes.errorMsg"> {{ verifyRes.errorMsg }} </span>
+      <span v-else class="text-green-700">
+        <span v-if="verifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
+      </span>
+    </p>
     <div ref="flinkSql" class="overflow-hidden w-full mt-5px" :class="flinkEditorClass"></div>
   </div>
-  <p class="conf-desc mt-10px" v-if="!fullScreenStatus">
+  <!-- <p class="conf-desc mt-10px" v-if="!fullScreenStatus">
     <span class="text-red-600" v-if="verifyRes.errorMsg"> {{ verifyRes.errorMsg }} </span>
     <span v-else class="text-green-700">
       <span v-if="verifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
     </span>
-  </p>
+  </p> -->
 </template>

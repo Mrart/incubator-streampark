@@ -45,7 +45,7 @@ export const useEditStreamParkSchema = (
     getFlinkSqlSchema,
     getFlinkSqlOtherSchema,
     getFlinkClusterSchemas,
-    getFlinkFormOtherSchemas,
+    // getFlinkFormOtherSchemas,
     getFlinkTypeSchema,
     getExecutionModeSchema,
     getFlinkNameDetailSchema,
@@ -119,7 +119,7 @@ export const useEditStreamParkSchema = (
       modified: obj2.version,
     });
   }
-  const getEditStreamParkFormSchema = computed((): FormSchema[] => {
+  const getEditStreamParkFormSchema = computed((): FormSchema[] => {// 无用
     return [
       ...getFlinkTypeSchema.value, // 作业模式 + 作业类型
       ...getExecutionModeSchema.value, // 执行模式
@@ -198,7 +198,7 @@ export const useEditStreamParkSchema = (
         defaultValue: false,
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
       },
-      ...getFlinkFormOtherSchemas.value,
+      // ...getFlinkFormOtherSchemas.value,
     ];
   });
 
@@ -230,6 +230,19 @@ export const useEditStreamParkSchema = (
         slot: 'appConf',
         ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
       },
+      {
+        field: 'args',
+        label: t('flink.app.programArgs'),
+        component: 'InputTextArea',
+        defaultValue: '',
+        slot: 'args',
+        ifShow: ({ values }) => {
+          console.log('!!!', values)
+          // return true
+          return values.jobType == JobTypeEnum.JAR
+        },
+      },
+
     ]
   })
   // 属性

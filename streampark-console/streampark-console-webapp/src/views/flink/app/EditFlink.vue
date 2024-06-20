@@ -60,6 +60,7 @@
   let initFormModel = reactive<Recordable>({})
   let isfailMsgActive = ref(false)
   let isAttrfailMsgActive = ref(false)
+  const isShow = ref(false)
   const k8sTemplate = reactive({
     podTemplate: '',
     jmPodTemplate: '',
@@ -88,13 +89,17 @@
 
   /* Form reset */
   function handleReset(executionMode?: string) {
+    isShow.value = true
     nextTick(async () => {
       let selectAlertId: string | undefined;
       if (app.alertId) {
         selectAlertId = unref(alerts)?.filter((t) => t.id == app.alertId)[0]?.id;
       }
       const resetParams = handleResetApplication();
+      console.log('resetParams', resetParams);
+      
       const defaultParams = {
+        // jobType: app.jobType,
         jobName: app.jobName,
         tags: app.tags,
         mainClass: app.mainClass,
@@ -148,6 +153,7 @@
       console.log("initFormModel", initFormModel)
       console.log("defaultParams", defaultParams)
       initFormModel = {...initFormModel, ...defaultParams}
+      // setFieldsValue(initFormModel);
       sessionStorage.setItem('AddJobModalParams', JSON.stringify(initFormModel))
       app.args && programArgRef.value?.setContent(app.args);
       // setTimeout(() => {
@@ -252,19 +258,21 @@
       return;
     }
     const value = await handleGetApplication();
-    initFormModel = {...value, options: app.options || {}, id: route.query.appId}
-    // nextTick(async ()=>{
-    await setFieldsValue(value);
-    try {
-      if (app.resourceFrom == ResourceFromEnum.CICD) {
-        jars.value = await fetchListJars({
-          id: app.projectId,
-          module: app.module,
-        });
-      }
-    } catch(e) {}
-    handleReset();
-    // })
+    console.log('@@@', value);
+    nextTick(async ()=>{
+      initFormModel = {...value, options: app.options || {}, id: route.query.appId}
+      // nextTick(async ()=>{
+      // await setFieldsValue(value);
+      try {
+        if (app.resourceFrom == ResourceFromEnum.CICD) {
+          jars.value = await fetchListJars({
+            id: app.projectId,
+            module: app.module,
+          });
+        }
+      } catch(e) {}
+      handleReset();
+    })
   });
   onBeforeUnmount(() => {
     sessionStorage.removeItem('AddJobModalParams');
@@ -274,9 +282,11 @@
   <div>
   <PageWrapper contentBackground content-class="p-26px app_controller app-content-margin-right">
     <BasicForm 
+      v-if="isShow"
       @register="registerForm" 
       @submit="handleAppUpdate" 
       :schemas="getEditMainFlinkFormSchema"
+      :initFormModel="initFormModel"
       :isAboutApp="true"
     >
       <template #podTemplate>

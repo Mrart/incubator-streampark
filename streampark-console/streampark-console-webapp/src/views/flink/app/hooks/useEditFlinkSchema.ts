@@ -24,6 +24,7 @@ import { useRoute } from 'vue-router';
 import { fetchMain } from '/@/api/flink/app/app';
 import { ResourceFromEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { JobTypeEnum } from '/@/enums/flinkEnum';
 const { t } = useI18n();
 
 export const useEditFlinkSchema = (jars: Ref) => {
@@ -34,7 +35,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
     flinkEnvs,
     flinkClusters,
     getFlinkClusterSchemas,
-    getFlinkFormOtherSchemas,
+    // getFlinkFormOtherSchemas,
     getFlinkNameDetailSchema,
     getFlinkFormAttrOtherSchemas,
     getFlinkFormConfigSchemas,
@@ -44,7 +45,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
     suggestions,
   } = useCreateAndEditSchema(null, undefined, { appId: route.query.appId as string, mode: 'streampark' });
 
-  const getEditFlinkFormSchema = computed((): FormSchema[] => {
+  const getEditFlinkFormSchema = computed((): FormSchema[] => {// 无用
     return [
       ...getFlinkTypeSchema.value,
       ...getExecutionModeSchema.value,
@@ -127,7 +128,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
         component: 'Input',
         slot: 'dependency',
       },
-      ...getFlinkFormOtherSchemas.value,
+      // ...getFlinkFormOtherSchemas.value,
     ];
   });
 
@@ -205,6 +206,16 @@ export const useEditFlinkSchema = (jars: Ref) => {
           placeholder: 'Please enter Main class',
         },
         rules: [{ required: true, message: 'Program Main is required' }],
+      },
+      {
+        field: 'args',
+        label: t('flink.app.programArgs'),
+        component: 'InputTextArea',
+        defaultValue: '',
+        slot: 'args',
+        ifShow: ({values}) => {
+          return values.jobType == JobTypeEnum.JAR
+        },
       },
     ]
   })
