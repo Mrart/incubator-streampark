@@ -195,6 +195,10 @@
         [data.file.name]: data.file.name,
       });
       dependency.jar[data.file.name] = data.file.name;
+      console.log(data.file);
+      console.log(props.formModel.historyjar);
+      console.log(dependency.jar[data.file.name]);
+      
       handleUpdateDependency();
     } catch (error) {
       console.error(error);
@@ -214,6 +218,8 @@
     });
     dependencyRecords.value = deps;
     uploadJars.value = jars;
+    console.log('uploadJars', uploadJars.value);
+    
   }
   /* load history config records */
   async function handleReloadHistoryUploads() {
@@ -242,8 +248,12 @@
   }
   // set default value
   function setDefaultValue(dataSource: { pom?: DependencyType[]; jar?: string[] }) {
+    console.log('dataSource', dataSource);
     dependencyRecords.value = dataSource.pom || [];
     uploadJars.value = dataSource.jar || [];
+    console.log('uploadJars', uploadJars.value);
+    console.log('uploadJars', uploadJars.value.length);
+    
     dependency.pom = {};
     dependency.jar = {};
     dataSource.pom?.map((pomRecord: DependencyType) => {

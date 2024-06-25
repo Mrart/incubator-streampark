@@ -50,7 +50,11 @@
   import { useSavepoint } from './hooks/useSavepoint';
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
+<<<<<<< HEAD
   import AddAlert from './AddAlert.vue';
+=======
+  import AddAppModal from './AddAppModal.vue';
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   const { t } = useI18n();
   const optionApps = {
     starting: new Map(),
@@ -76,7 +80,11 @@
   const [registerStopModal, { openModal: openStopModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
+<<<<<<< HEAD
   const [registerAlertModal, { openModal: openAlertModal }] = useModal();
+=======
+  const [registerAddModal, { openModal: openAddAppModal }] = useModal();
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
 
   const [registerTable, { reload, getLoading, setPagination }] = useTable({
     rowKey: 'id',
@@ -194,7 +202,11 @@
     openBuildDrawer,
     handlePageDataReload,
     optionApps,
+<<<<<<< HEAD
     openAlertModal
+=======
+    openAddAppModal
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   );
 
   /* view */
@@ -349,7 +361,11 @@
     <StopApplicationModal @register="registerStopModal" @update-option="handleOptionApp" />
     <LogModal @register="registerLogModal" />
     <BuildDrawer @register="registerBuildDrawer" />
+<<<<<<< HEAD
     <AddAlert @register="registerAlertModal" width="850px" />
+=======
+    <AddAppModal @register="registerAddModal" width="850px" />
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   </PageWrapper>
 </template>
 <style lang="less">

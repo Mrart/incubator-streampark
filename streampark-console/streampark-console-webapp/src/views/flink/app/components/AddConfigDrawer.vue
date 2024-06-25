@@ -63,7 +63,11 @@
       const { createMessage } = useMessage();
       const { handleResetApplication, memoryItems } = useEdit();
 
+<<<<<<< HEAD
       const [registerForm, { resetFields, setFieldsValue, getFieldsValue, clearValidate, validateFields }] = useForm({
+=======
+      const [registerForm, { setFieldsValue, getFieldsValue, clearValidate, validateFields }] = useForm({
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
         name: 'MemberForm',
         colon: true,
         showActionButtonGroup: false,
@@ -75,7 +79,10 @@
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         // formType.value = data.formType;
         console.log("addCofigDrawer", data)
+<<<<<<< HEAD
         resetFields();
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
         clearValidate();
         // updateSchema(formSchema(unref(formType)));
         setDrawerProps({

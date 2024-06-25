@@ -285,13 +285,8 @@ export function handleSubmitParams(
   values: Recordable,
   k8sTemplate: Recordable,
 ) {
-  let options = handleFormValue(values);
+  const options = handleFormValue(values);
   console.log("handleSubmitParams", values)
-  // if(!values.options) {
-  //   options = handleFormValue(values);
-  // } else {
-  //   options = values.options
-  // }
   Object.assign(params, {
     executionMode: values.executionMode,
     versionId: values.versionId,

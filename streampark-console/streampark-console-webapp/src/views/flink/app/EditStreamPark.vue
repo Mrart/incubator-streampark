@@ -389,6 +389,10 @@
       configVisible.value = false
       attrVisible.value = true
       closeConfigureDrawer()
+<<<<<<< HEAD
+=======
+      console.log('initFormData', initFormData);
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
       openDrawer(true, initFormData);
     } else {
       attrVisible.value = false
@@ -406,7 +410,16 @@
     configVisible.value = false
     attrVisible.value = false
   }
+<<<<<<< HEAD
   async function addConfigsuccess() {
+=======
+  async function addConfigsuccess(type: string) {
+    if (type === 'config') {
+      isfailMsgActive.value = false
+    } else {
+      isAttrfailMsgActive.value = false
+    }
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     configVisible.value = false
     attrVisible.value = false
   }

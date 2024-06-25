@@ -48,6 +48,7 @@ export const useEdit = () => {
       versionId: res.versionId,
       executionMode: res.executionMode,
       resourceFrom: res.resourceFrom,
+      dependency: res.dependency, // apacheFlink作业类型 依赖不反显
     });
     return returnData;
   }

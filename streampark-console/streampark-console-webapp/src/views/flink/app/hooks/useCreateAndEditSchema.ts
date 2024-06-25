@@ -307,6 +307,7 @@ export const useCreateAndEditSchema = (
     }
   }
 
+<<<<<<< HEAD
   // const getFlinkFormOtherSchemas = computed((): FormSchema[] => {
   //   const commonInputNum = {
   //     min: 0,
@@ -487,6 +488,8 @@ export const useCreateAndEditSchema = (
   // });
 
 
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   // configurate
   const getFlinkFormConfigSchemas = computed((): FormSchema[] => {
     const commonInputNum = {
@@ -528,6 +531,7 @@ export const useCreateAndEditSchema = (
           ...commonInputNum,
         },
       },
+<<<<<<< HEAD
       // {
       //   field: 'restartSize', // (失败后)重启次数
       //   label: t('flink.app.restartSize'),
@@ -556,6 +560,8 @@ export const useCreateAndEditSchema = (
       //   renderColContent: renderInputGroup,
       //   show: ({ values }) => (edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode)),
       // },
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
       ...getConfigSchemas(),
       {
         field: 'totalOptions', // 总内存
@@ -850,7 +856,10 @@ export const useCreateAndEditSchema = (
     getFlinkSqlSchema,
     getFlinkSqlOtherSchema,
     getFlinkClusterSchemas,
+<<<<<<< HEAD
     // getFlinkFormOtherSchemas,
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     getFlinkTypeSchema,
     getExecutionModeSchema,
     getFlinkNameDetailSchema,

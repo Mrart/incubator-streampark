@@ -100,6 +100,7 @@
     resetFields();
     alertId.value = '';
     alertType.value = [];
+    console.log('222', data);
     if (data && Object.keys(data).length > 0) {
       alertId.value = data.alertId;
       alertType.value = data.alertType;

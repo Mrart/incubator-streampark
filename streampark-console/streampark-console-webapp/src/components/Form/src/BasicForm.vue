@@ -239,6 +239,21 @@
         () => formModel,
         useDebounceFn(() => {
           console.log("formModel", formModel)
+<<<<<<< HEAD
+=======
+          if (formModel.resourceFrom) {
+            const sessionFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
+            sessionStorage.setItem('AddJobModalParams', 
+              JSON.stringify({...sessionFormData, resourceFrom: formModel.resourceFrom})
+            )
+          }
+          if (formModel.appType) {
+            const sessionFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
+            sessionStorage.setItem('AddJobModalParams', 
+              JSON.stringify({...sessionFormData, appType: formModel.appType})
+            )
+          }
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
           unref(getProps).submitOnChange && handleSubmit();
         }, 300),
         { deep: true },

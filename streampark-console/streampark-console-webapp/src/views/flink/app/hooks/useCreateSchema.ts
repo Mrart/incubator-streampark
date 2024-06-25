@@ -63,12 +63,18 @@ export const useCreateSchema = (
     getFlinkSqlOtherSchema,
     getFlinkClusterSchemas,
     getExecutionModeSchema,
+<<<<<<< HEAD
     // getFlinkFormOtherSchemas,
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     getFlinkFormAttrOtherSchemas,
     getFlinkNameDetailSchema,
     suggestions,
     getFlinkFormConfigSchemas,
+<<<<<<< HEAD
     // getFlinkTypeSchema
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   } = useCreateAndEditSchema(dependencyRef, isDisabled);
   function handleCheckConfig(_rule: RuleObject, value: StoreValue) {
     if (value) {
@@ -82,6 +88,7 @@ export const useCreateSchema = (
       return Promise.reject('Please select config');
     }
   }
+<<<<<<< HEAD
   // const getCreateFormSchema = computed((): FormSchema[] => {
   //   return [
   //     {
@@ -298,6 +305,8 @@ export const useCreateSchema = (
   //   ];
   // });
 
+=======
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   const getFirstCreateFormSchema = computed((): FormSchema[] => {
     return [
       {
@@ -455,7 +464,7 @@ export const useCreateSchema = (
               { label: 'StreamPark Flink', value: String(AppTypeEnum.STREAMPARK_FLINK) },
               { label: 'Apache Flink', value: String(AppTypeEnum.APACHE_FLINK) },
             ],
-            onChange: () => {
+            onChange: (value: string) => {
               Object.assign(formModel, {
                 config: undefined,
                 jobName: undefined,
@@ -463,7 +472,11 @@ export const useCreateSchema = (
               });
               const sessionFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
               sessionStorage.setItem('AddJobModalParams', 
+<<<<<<< HEAD
                 JSON.stringify({...sessionFormData, jobName: undefined})
+=======
+                JSON.stringify({...sessionFormData, appType: value, jobName: undefined})
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
               )
               fetchListJars({
                 id: formModel.project,
@@ -577,5 +590,18 @@ export const useCreateSchema = (
       ...getFlinkFormConfigSchemas.value
     ]
   })
+<<<<<<< HEAD
   return { flinkEnvs, flinkClusters, suggestions, getFirstCreateFormSchema, getAttrCreateFormSchema, getMainCreateFormSchema, getCustomCreateFormSchema, getConfigFormSchema };
+=======
+  return { 
+    flinkEnvs,
+    flinkClusters,
+    suggestions,
+    getFirstCreateFormSchema,
+    getAttrCreateFormSchema,
+    getMainCreateFormSchema,
+    getCustomCreateFormSchema,
+    getConfigFormSchema
+  };
+>>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
 };
