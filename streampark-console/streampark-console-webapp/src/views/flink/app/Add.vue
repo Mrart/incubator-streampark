@@ -340,20 +340,14 @@
   async function handleEdit(type: string) {
     if(attrVisible.value) {
       await attributeForm.value?.handleSubmit()
-<<<<<<< HEAD
-=======
       if (isAttrfailMsgActive.value) return // 属性校验不通过禁止直接跳到配置
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     }
     if(configVisible.value) {
       await configForm.value?.handleSubmit()
     }
     const sessionFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
     const initFormData = getFieldsValue();
-<<<<<<< HEAD
-=======
     
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     let name = sessionFormData.jobName
     sessionStorage.setItem('AddJobModalParams', JSON.stringify({ ...initFormData,...sessionFormData}))
     const checkPointFailure = !!sessionFormData.checkPointFailure ? sessionFormData.checkPointFailure : {}
@@ -374,26 +368,17 @@
       openConfigureDrawer(true, sessionFormData);
     }
   }
-<<<<<<< HEAD
-  async function addConfigFailed(data: string) {
-    configVisible.value = false
-    attrVisible.value = false
-=======
   // 校验失败时执行
   async function addConfigFailed(data: string) {
     isAttrfailMsgActive.value = false
     isfailMsgActive.value = false
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     if (data === 'config') {
       isfailMsgActive.value = true
     } else {
       isAttrfailMsgActive.value = true
     }
   }
-<<<<<<< HEAD
-=======
   // 校验成功时执行
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   function addAttrsuccess(type: string) {
     if (type === 'config') {
       isfailMsgActive.value = false
@@ -406,10 +391,7 @@
     const oldData = getFieldsValue()
     const params = {...oldData, ...data}
     setFieldsValue({...params})
-<<<<<<< HEAD
-=======
     sessionStorage.setItem('AddJobModalParams', JSON.stringify(params)) // 成功后重新存储一遍数据
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     checkedFromData = params
   }
   

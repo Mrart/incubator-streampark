@@ -97,10 +97,6 @@
       }
       const resetParams = handleResetApplication();
       console.log('resetParams', resetParams);
-<<<<<<< HEAD
-      
-=======
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
       const defaultParams = {
         // jobType: app.jobType,
         jobName: app.jobName,
@@ -159,21 +155,12 @@
       // setFieldsValue(initFormModel);
       sessionStorage.setItem('AddJobModalParams', JSON.stringify(initFormModel))
       app.args && programArgRef.value?.setContent(app.args);
-<<<<<<< HEAD
-      // setTimeout(() => {
-      //   unref(dependencyRef)?.setDefaultValue(JSON.parse(app.dependency || '{}'));
-      //   unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
-      //   unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', app.k8sJmPodTemplate);
-      //   unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', app.k8sTmPodTemplate);
-      // }, 1000);
-=======
       setTimeout(() => {
         // unref(dependencyRef)?.setDefaultValue(JSON.parse(app.dependency || '{}'));
         // unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', app.k8sPodTemplate);
         // unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', app.k8sJmPodTemplate);
         // unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', app.k8sTmPodTemplate);
       }, 1000);
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     });
   }
   /* Custom job upload */
@@ -241,10 +228,7 @@
       configVisible.value = false
       attrVisible.value = true
       closeConfigureDrawer();
-<<<<<<< HEAD
-=======
       console.log('initFormData', initFormData);
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
       openDrawer(true, initFormData);
     } else {
       attrVisible.value = false

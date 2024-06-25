@@ -44,11 +44,7 @@ export const useAppTableAction = (
   openBuildDrawer: Fn,
   handlePageDataReload: Fn,
   optionApps: Recordable,
-<<<<<<< HEAD
-  openAlertModal: Fn
-=======
   openAddAppModal: Fn
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
 ) => {
   const { t } = useI18n();
   const tagsOptions = ref<Recordable>([]);
@@ -274,11 +270,7 @@ export const useAppTableAction = (
       showSubmitButton: false,
       showResetButton: false,
       async resetFunc() {
-<<<<<<< HEAD
-        openAlertModal()
-=======
-        openAddAppModal(true, {x:1,y: 1})
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
+        openAddAppModal(true, {})
       },
       schemas: [
         {

@@ -63,18 +63,10 @@ export const useCreateSchema = (
     getFlinkSqlOtherSchema,
     getFlinkClusterSchemas,
     getExecutionModeSchema,
-<<<<<<< HEAD
-    // getFlinkFormOtherSchemas,
-=======
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
     getFlinkFormAttrOtherSchemas,
     getFlinkNameDetailSchema,
     suggestions,
     getFlinkFormConfigSchemas,
-<<<<<<< HEAD
-    // getFlinkTypeSchema
-=======
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   } = useCreateAndEditSchema(dependencyRef, isDisabled);
   function handleCheckConfig(_rule: RuleObject, value: StoreValue) {
     if (value) {
@@ -88,225 +80,6 @@ export const useCreateSchema = (
       return Promise.reject('Please select config');
     }
   }
-<<<<<<< HEAD
-  // const getCreateFormSchema = computed((): FormSchema[] => {
-  //   return [
-  //     {
-  //       field: 'jobType',
-  //       label: t('flink.app.developmentMode'),
-  //       component: 'Select',
-  //       componentProps: ({ formModel }) => {
-  //         return {
-  //           placeholder: t('flink.app.addAppTips.developmentModePlaceholder'),
-  //           options: getJobTypeOptions(),
-  //           onChange: (value: string) => {
-  //             if (value === 'sql') {
-  //               formModel.tableEnv = 1;
-  //             } else {
-  //               formModel.resourceFrom = 'cvs';
-  //             }
-  //           },
-  //         };
-  //       },
-  //       defaultValue: 'sql',
-  //       rules: [
-  //         { required: true, message: t('flink.app.addAppTips.developmentModeIsRequiredMessage') },
-  //       ],
-  //     },
-  //     ...getExecutionModeSchema.value,
-  //     ...getFlinkClusterSchemas.value,
-  //     {
-  //       field: 'resourceFrom',
-  //       label: t('flink.app.resourceFrom'),
-  //       component: 'Select',
-  //       render: ({ model }) => renderResourceFrom(model),
-  //       rules: [{ required: true, message: t('flink.app.addAppTips.resourceFromMessage') }],
-  //       show: ({ values }) => values?.jobType != 'sql',
-  //     },
-  //     {
-  //       field: 'uploadJobJar',
-  //       label: t('flink.app.uploadJobJar'),
-  //       component: 'Select',
-  //       slot: 'uploadJobJar',
-  //       ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
-  //     },
-  //     {
-  //       field: 'mainClass',
-  //       label: t('flink.app.mainClass'),
-  //       component: 'Input',
-  //       componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
-  //       ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom == 'upload',
-  //       rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
-  //     },
-  //     ...getFlinkSqlSchema.value,
-  //     {
-  //       field: 'project',
-  //       label: t('flink.app.project'),
-  //       component: 'Select',
-  //       componentProps: {
-  //         showSearch: true,
-  //         optionFilterProp: 'children',
-  //         filterOption: (input: string, options: Recordable) => {
-  //           return options.name.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-  //         },
-  //         placeholder: t('flink.app.addAppTips.projectPlaceholder'),
-  //         fieldNames: { label: 'name', value: 'id', options: 'options' },
-  //         options: unref(projectList),
-  //         onChange: (value: string) => {
-  //           // When a valid value is entered, the module api needs to be sent
-  //           if (value) {
-  //             modules({
-  //               id: value,
-  //             }).then((res) => {
-  //               moduleList.value = res.map((i: string) => ({ label: i, value: i }));
-  //             });
-  //           }
-  //         },
-  //       },
-  //       ifShow: ({ values }) => values?.jobType != 'sql' && values.resourceFrom != 'upload',
-  //       rules: [{ required: true, message: t('flink.app.addAppTips.projectIsRequiredMessage') }],
-  //     },
-  //     {
-  //       field: 'module',
-  //       label: t('flink.app.module'),
-  //       component: 'Select',
-  //       componentProps: ({ formModel }) => {
-  //         return {
-  //           showSearch: true,
-  //           optionFilterProp: 'children',
-  //           filterOption,
-  //           placeholder: t('flink.app.addAppTips.projectModulePlaceholder'),
-  //           options: unref(moduleList),
-  //           onChange: () => {
-  //             Object.assign(formModel, {
-  //               appType: undefined,
-  //               config: undefined,
-  //               jobName: undefined,
-  //             });
-  //           },
-  //         };
-  //       },
-  //       ifShow: ({ values }) => values?.jobType != 'sql' && values?.resourceFrom != 'upload',
-  //       rules: [{ required: true, message: t('flink.app.addAppTips.projectIsRequiredMessage') }],
-  //     },
-  //     {
-  //       field: 'appType',
-  //       label: t('flink.app.appType'),
-  //       component: 'Select',
-  //       componentProps: ({ formModel }) => {
-  //         return {
-  //           placeholder: t('flink.app.addAppTips.appTypePlaceholder'),
-  //           options: [
-  //             { label: 'StreamPark Flink', value: String(AppTypeEnum.STREAMPARK_FLINK) },
-  //             { label: 'Apache Flink', value: String(AppTypeEnum.APACHE_FLINK) },
-  //           ],
-  //           onChange: () => {
-  //             Object.assign(formModel, {
-  //               config: undefined,
-  //               jobName: undefined,
-  //               configOverride: null,
-  //             });
-  //             fetchListJars({
-  //               id: formModel.project,
-  //               module: formModel.module,
-  //             }).then((res) => {
-  //               jars.value = res;
-  //             });
-  //           },
-  //         };
-  //       },
-  //       ifShow: ({ values }) => values?.jobType !== 'sql' && values?.resourceFrom !== 'upload',
-  //       dynamicRules: () => [
-  //         { required: true, message: t('flink.app.addAppTips.appTypeIsRequiredMessage') },
-  //       ],
-  //     },
-  //     {
-  //       field: 'jar',
-  //       label: t('flink.app.programJar'),
-  //       component: 'Select',
-  //       componentProps: ({ formModel }) => {
-  //         return {
-  //           placeholder: t('flink.app.addAppTips.appTypePlaceholder'),
-  //           options: unref(jars).map((i) => ({ label: i, value: i })),
-  //           onChange: (value) => {
-  //             fetchMain({
-  //               projectId: formModel.project,
-  //               module: formModel.module,
-  //               jar: value,
-  //             }).then((res) => {
-  //               formModel.mainClass = res;
-  //             });
-  //           },
-  //         };
-  //       },
-  //       ifShow: ({ values }) =>
-  //         values?.jobType != 'sql' &&
-  //         values?.resourceFrom != 'upload' &&
-  //         values.appType == String(AppTypeEnum.APACHE_FLINK),
-  //       rules: [{ required: true, message: t('flink.app.addAppTips.programJarIsRequiredMessage') }],
-  //     },
-  //     {
-  //       field: 'mainClass',
-  //       label: t('flink.app.mainClass'),
-  //       component: 'Input',
-  //       componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
-  //       ifShow: ({ values }) =>
-  //         values?.jobType != 'sql' &&
-  //         values?.resourceFrom != 'upload' &&
-  //         values.appType == String(AppTypeEnum.APACHE_FLINK),
-  //       rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
-  //     },
-  //     {
-  //       field: 'dependency',
-  //       label: t('flink.app.dependency'),
-  //       component: 'Input',
-  //       slot: 'dependency',
-  //       ifShow: ({ values }) => {
-  //         console.log("scheamValue", values)
-  //         return values?.jobType == 'sql' ? true : values?.appType == AppTypeEnum.APACHE_FLINK;
-  //       },
-  //     },
-  //     {
-  //       field: 'config',
-  //       label: t('flink.app.appConf'),
-  //       component: 'ApiTreeSelect',
-  //       componentProps: ({ formModel }) => {
-  //         return {
-  //           api: fetchListConf,
-  //           params: { id: formModel.project, module: formModel.module },
-  //           dropdownStyle: { maxHeight: '400px', overflow: 'auto' },
-  //           placeholder: 'Please select config',
-  //           treeDefaultExpandAll: true,
-  //           fieldNames: { children: 'children', label: 'title', key: 'value', value: 'value' },
-  //           onChange: (value: string) => {
-  //             fetchName({
-  //               config: value,
-  //             }).then((resp) => {
-  //               formModel.jobName = resp;
-  //             });
-  //           },
-  //         };
-  //       },
-  //       ifShow: ({ values }) =>
-  //         values?.jobType != 'sql' &&
-  //         values?.resourceFrom != 'upload' &&
-  //         values.appType == String(AppTypeEnum.STREAMPARK_FLINK),
-  //       dynamicRules: () => [{ required: true, validator: handleCheckConfig }],
-  //     },
-  //     {
-  //       field: 'useSysHadoopConf',
-  //       label: t('flink.app.addAppTips.useSysHadoopConf'),
-  //       component: 'Switch',
-  //       slot: 'useSysHadoopConf',
-  //       defaultValue: false,
-  //       ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
-  //     },
-  //     ...getFlinkFormOtherSchemas.value,
-  //   ];
-  // });
-
-=======
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
   const getFirstCreateFormSchema = computed((): FormSchema[] => {
     return [
       {
@@ -472,11 +245,7 @@ export const useCreateSchema = (
               });
               const sessionFormData = JSON.parse(sessionStorage.getItem('AddJobModalParams')!)
               sessionStorage.setItem('AddJobModalParams', 
-<<<<<<< HEAD
-                JSON.stringify({...sessionFormData, jobName: undefined})
-=======
                 JSON.stringify({...sessionFormData, appType: value, jobName: undefined})
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
               )
               fetchListJars({
                 id: formModel.project,
@@ -590,9 +359,6 @@ export const useCreateSchema = (
       ...getFlinkFormConfigSchemas.value
     ]
   })
-<<<<<<< HEAD
-  return { flinkEnvs, flinkClusters, suggestions, getFirstCreateFormSchema, getAttrCreateFormSchema, getMainCreateFormSchema, getCustomCreateFormSchema, getConfigFormSchema };
-=======
   return { 
     flinkEnvs,
     flinkClusters,
@@ -603,5 +369,4 @@ export const useCreateSchema = (
     getCustomCreateFormSchema,
     getConfigFormSchema
   };
->>>>>>> 630649aa1 ([ui] add hzbank ui improve feature)
 };
